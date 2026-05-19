@@ -1,0 +1,342 @@
+[
+  {
+    "id": "6819b29d-203d-52e5-8526-3e048d0a0d8c",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Judith Peralta",
+    "last_name": "",
+    "phone": null,
+    "email": "judithperalta@logros.com",
+    "active": true
+  },
+  {
+    "id": "6d261deb-21c6-5168-96cf-b3c0d7ff3f72",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Juan",
+    "last_name": "Pérez",
+    "phone": null,
+    "email": "padre@logros.com",
+    "active": true
+  },
+  {
+    "id": "9811a666-e277-5966-bac9-2dd467aba1b8",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Raul",
+    "last_name": "",
+    "phone": null,
+    "email": "Mario@logros.com",
+    "active": true
+  },
+  {
+    "id": "3278f5a7-089d-584a-a6d6-620e5e4c8d78",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Ruth Portocarrero",
+    "last_name": "",
+    "phone": null,
+    "email": "ruthportocarrero@logros.com",
+    "active": true
+  },
+  {
+    "id": "ff82f33d-3c14-5422-a1b0-ab2ecdd47d26",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "fart",
+    "last_name": "",
+    "phone": null,
+    "email": "jesus@logros.com",
+    "active": true
+  },
+  {
+    "id": "bca7eed2-4620-53ca-ac04-79b911241dbf",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Virginia Campoverde Reyes",
+    "last_name": "",
+    "phone": null,
+    "email": "virginacamp@logros.com",
+    "active": true
+  },
+  {
+    "id": "9df99f8d-cb20-51c9-9550-385180dcff6d",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Armida Vera",
+    "last_name": "",
+    "phone": null,
+    "email": "armidavera@logros.com",
+    "active": true
+  },
+  {
+    "id": "6564c49f-829e-583a-9562-a7b4c428ca5c",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "terapeuta",
+    "first_name": "Sofia ",
+    "last_name": "Falcone",
+    "phone": null,
+    "email": "sofiafalcone@logros.com",
+    "active": true
+  },
+  {
+    "id": "13f66a89-590a-5e99-8738-f72c713c0aed",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "terapeuta",
+    "first_name": "Emily",
+    "last_name": "Macay",
+    "phone": null,
+    "email": "emilymacay@logros.com",
+    "active": true
+  },
+  {
+    "id": "e72377c3-9196-5abe-805c-dbdc05975c5d",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "super_admin",
+    "first_name": "Admin",
+    "last_name": "Principal",
+    "phone": null,
+    "email": "admin@logros.com",
+    "active": true
+  },
+  {
+    "id": "d04d047f-c916-50d4-b75b-09db91a3a59a",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Brenda Perez",
+    "last_name": "",
+    "phone": null,
+    "email": "brendaperez@logros.com",
+    "active": true
+  },
+  {
+    "id": "6a018f62-b691-562a-9cd6-5b56fe1d63f8",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Carolina Pucay",
+    "last_name": "",
+    "phone": null,
+    "email": "Carolinapu@logros.com",
+    "active": true
+  },
+  {
+    "id": "5bcbe895-0285-5b97-aae8-f44fc813a731",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "yyyyyyyy",
+    "last_name": "",
+    "phone": null,
+    "email": "Luis@logros.com",
+    "active": true
+  },
+  {
+    "id": "872ef41b-3a18-5184-8af2-80d73e3a0110",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Erika Reyna",
+    "last_name": "",
+    "phone": null,
+    "email": "erikareyna@logors.com",
+    "active": true
+  },
+  {
+    "id": "a13503e8-a286-5221-ae6c-b2a2c6eaddd3",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Tatiana Pretente",
+    "last_name": "",
+    "phone": null,
+    "email": "tatianapret@logros.com",
+    "active": true
+  },
+  {
+    "id": "8f0ed25c-4813-5b0b-aa07-107cad41fb45",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "josue",
+    "last_name": "",
+    "phone": null,
+    "email": "johan@logros.com",
+    "active": false
+  },
+  {
+    "id": "af6074da-ff5a-539d-8018-a025c1bd0431",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Katherin Pinto ",
+    "last_name": "",
+    "phone": null,
+    "email": "kathepinto@logros.com",
+    "active": true
+  },
+  {
+    "id": "2168e00d-36d8-50f1-a4c9-5ca4cc4c8004",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Noemí Guerrero Fienco",
+    "last_name": "",
+    "phone": null,
+    "email": "noemirihana@logros.com",
+    "active": true
+  },
+  {
+    "id": "111d4eac-401b-5f82-992a-ff2a8e5dcb09",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "super_admin",
+    "first_name": "",
+    "last_name": "",
+    "phone": null,
+    "email": "mirellasugei@logros.com",
+    "active": true
+  },
+  {
+    "id": "bbee901f-285f-51ef-abed-125dbab3f8ab",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Juan",
+    "last_name": "Pérez",
+    "phone": null,
+    "email": "padre@logros.com",
+    "active": true
+  },
+  {
+    "id": "477693c4-f01c-5ddf-96ca-4653c88380f3",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "admin",
+    "first_name": "Mercedes Mecha",
+    "last_name": "",
+    "phone": null,
+    "email": "mechamer@logros.com",
+    "active": true
+  },
+  {
+    "id": "5d5d3364-204c-5e75-a23e-69810e0b35d3",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Yara Freire ",
+    "last_name": "",
+    "phone": null,
+    "email": "yarafreire@logros.com",
+    "active": true
+  },
+  {
+    "id": "86489c53-7739-52b4-8519-b0725fed62ae",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "ffffff",
+    "last_name": "",
+    "phone": null,
+    "email": "Jess@logros.com",
+    "active": true
+  },
+  {
+    "id": "83e7131a-c868-5865-8abc-a28916a2db35",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "terapeuta",
+    "first_name": "Nicol ",
+    "last_name": "Plaza ",
+    "phone": null,
+    "email": "plazatnicol@logros.com",
+    "active": true
+  },
+  {
+    "id": "d49c6d3b-194b-502c-ac5c-161d1c82dbba",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Alicia Montesdeoca",
+    "last_name": "",
+    "phone": null,
+    "email": "aliciamontes@logros.com",
+    "active": true
+  },
+  {
+    "id": "ba665a85-0298-54bb-97ba-3a7510c1d6e5",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "terapeuta",
+    "first_name": "mirella",
+    "last_name": "Moran ",
+    "phone": null,
+    "email": "mirellamoran@logros.com",
+    "active": true
+  },
+  {
+    "id": "26ac6a94-af75-5991-84e3-8bdbb63b8950",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Nicole Espinoza",
+    "last_name": "",
+    "phone": null,
+    "email": "nicolespi@logros.com",
+    "active": true
+  },
+  {
+    "id": "e5fdb706-b024-54b8-88ee-741617b5541d",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "José Flores ",
+    "last_name": "",
+    "phone": null,
+    "email": "joseflores@logros.com",
+    "active": true
+  },
+  {
+    "id": "c67c4e71-b5f2-5cd5-a6f5-95c4afe22fd3",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": " Tamara Salazar",
+    "last_name": "",
+    "phone": null,
+    "email": "tamarasalazar@logros.com",
+    "active": true
+  },
+  {
+    "id": "e797231f-387b-5e18-a483-841c148bc4ab",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Gladys Piguave ",
+    "last_name": "",
+    "phone": null,
+    "email": "gladyspg@logros.com",
+    "active": true
+  },
+  {
+    "id": "14e699e0-6e5e-501f-b898-569e0287d977",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Noemí Guerrero Fienco",
+    "last_name": "",
+    "phone": null,
+    "email": "noemiguerrerof@logros.com",
+    "active": true
+  },
+  {
+    "id": "45a0890d-617d-5521-ad70-ec7d63711b0f",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Maria",
+    "last_name": "",
+    "phone": null,
+    "email": "mariaS@logros.com",
+    "active": false
+  },
+  {
+    "id": "d37e4bb1-5703-5fd3-b625-17afd400110c",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Andrea Peñaloza ",
+    "last_name": "",
+    "phone": null,
+    "email": "andreapenaloza@logros.com",
+    "active": false
+  },
+  {
+    "id": "662a340b-794e-5550-9822-85512334d42f",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "role": "padre",
+    "first_name": "Lissette  Guambuguete ",
+    "last_name": "",
+    "phone": null,
+    "email": "lisseteguambu@logros.com",
+    "active": true
+  }
+]

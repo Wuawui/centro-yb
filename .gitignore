@@ -1,0 +1,42 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# Producción
+build/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Variables de entorno
+.env*
+!.env.example
+
+# Supabase
+.supabase/
+supabase/.temp/
+
+# Python
+__pycache__/
+*.pyc
+
+# Firebase / Secrets
+firebase-service-account.json
+*credentials*.json
+*.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

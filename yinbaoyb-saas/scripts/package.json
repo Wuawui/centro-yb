@@ -1,0 +1,16 @@
+{
+  "name": "yinbaoyb-saas-migration",
+  "version": "1.0.0",
+  "description": "Scripts para migrar datos de Firebase a Supabase",
+  "scripts": {
+    "export": "node scripts/01-export-firebase.js",
+    "transform": "node scripts/02-transform-data.js",
+    "import": "node scripts/03-import-supabase.js",
+    "migrate": "node scripts/01-export-firebase.js && node scripts/02-transform-data.js && node scripts/03-import-supabase.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.1",
+    "@supabase/supabase-js": "^2.49.4",
+    "uuid": "^11.1.0"
+  }
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "786f3183-708a-415a-9adf-799e356593aa",
+    "specialty": "Psicología conductual",
+    "license_number": null,
+    "certifications": [],
+    "therapeutic_approach": [],
+    "max_patients": 20,
+    "active": true
+  },
+  {
+    "id": "2b8b4244-d3a2-4930-a0b3-18145f20e5cc",
+    "specialty": "Terapia de Lenguaje",
+    "license_number": null,
+    "certifications": [],
+    "therapeutic_approach": [],
+    "max_patients": 20,
+    "active": true
+  },
+  {
+    "id": "5dd60472-e6ad-4064-a950-66c6098f8a4c",
+    "specialty": "Terapia de Lenguaje",
+    "license_number": null,
+    "certifications": [],
+    "therapeutic_approach": [],
+    "max_patients": 20,
+    "active": true
+  },
+  {
+    "id": "e5e4a111-a46a-437f-9d7b-b11e82d3244d",
+    "specialty": "Terapia Ocupacional",
+    "license_number": null,
+    "certifications": [],
+    "therapeutic_approach": [],
+    "max_patients": 20,
+    "active": true
+  }
+]

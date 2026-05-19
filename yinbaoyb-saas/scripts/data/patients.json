@@ -1,0 +1,355 @@
+[
+  {
+    "id": "3YKSEowFGwQ7Km1ILpdl",
+    "firstName": "Iris Noha",
+    "lastName": "Santillan Guerrero ",
+    "dateOfBirth": "2020-12-18T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "TDAH"
+    ],
+    "parentId": "rwH5dPrf3tgLUNtYOejzfwQ7pKn1",
+    "parentEmail": "noemiguerrerof@logros.com",
+    "representativeName": "Noemí Guerrero Fienco",
+    "representativeId": "",
+    "phoneNumber": "0979610232",
+    "createdAt": "2025-12-01T15:07:19.000Z",
+    "active": true,
+    "therapistIds": [
+      "9IlmcDvzQfc0Qcw1QG437y1n1ry2"
+    ],
+    "color": "#50b996",
+    "visiblePassword": "noemi1234"
+  },
+  {
+    "id": "AoahaYUvHOsGVVHEGGZ1",
+    "firstName": "Erick Gustavo",
+    "lastName": "Flores Franco",
+    "dateOfBirth": "2019-04-15T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "Autismo"
+    ],
+    "parentId": "omTqJOegpRSZ9EwOCwpwMZE49Zq1",
+    "parentEmail": "joseflores@logros.com",
+    "representativeName": "José Flores ",
+    "representativeId": "",
+    "phoneNumber": "0988986060",
+    "createdAt": "2025-12-01T15:21:03.000Z",
+    "active": true,
+    "color": "#e15c14",
+    "therapistIds": [
+      "eE0yO7eolWhaAHWsHrs4O0nW3P92",
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2",
+      "lEZndtd4RYdYzEVfFjEpRfek7AW2"
+    ]
+  },
+  {
+    "id": "BFe0DEh2N3XiINen9LcP",
+    "firstName": "Bonnie Halime",
+    "lastName": "Pacheco Espinoza",
+    "dateOfBirth": "2023-11-24T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "No"
+    ],
+    "parentId": "lzBkz0iip8SljFIz7YaeiJqZYX73",
+    "parentEmail": "nicolespi@logros.com",
+    "representativeName": "Nicole Espinoza",
+    "representativeId": "",
+    "phoneNumber": "0993445900",
+    "therapistIds": [
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2"
+    ],
+    "createdAt": "2025-12-05T00:10:11.000Z",
+    "active": true,
+    "color": "#10b981"
+  },
+  {
+    "id": "CO5tcDqsWonQk05VSE5h",
+    "firstName": "Jose David ",
+    "lastName": "Garcia Paucay",
+    "dateOfBirth": "2023-05-07T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "Hablante tardio"
+    ],
+    "parentId": "EdVPxlHgFyXCDxvuqbNE59XDa5H3",
+    "representativeName": "Carolina Pucay",
+    "representativeId": "",
+    "phoneNumber": "0994898213",
+    "therapistIds": [
+      "9wWRiOAyFZbyJdSqMKCd5flm3Pr2"
+    ],
+    "createdAt": "2026-01-28T00:12:31.000Z",
+    "active": true,
+    "color": "#10b73a",
+    "parentEmail": "carolinapu@logros.com"
+  },
+  {
+    "id": "Cn7KK8qQrbfOzJu0gXCU",
+    "firstName": "Elliette Juliana ",
+    "lastName": "Veliz Potocarrero",
+    "dateOfBirth": "2024-10-30T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "No"
+    ],
+    "parentId": "76LmLLXAB8YL5oGj6Bwa61Q8Waz1",
+    "parentEmail": "ruthportocarrero@logros.com",
+    "representativeName": "Ruth Portocarrero",
+    "representativeId": "",
+    "phoneNumber": "0989566886",
+    "createdAt": "2025-12-01T15:52:33.000Z",
+    "active": true,
+    "color": "#1061b7",
+    "therapistIds": [
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2",
+      "lEZndtd4RYdYzEVfFjEpRfek7AW2"
+    ]
+  },
+  {
+    "id": "JwJudEGWWMotQaRIRxuB",
+    "firstName": "Alex Aizen",
+    "lastName": "Alache Peralta",
+    "dateOfBirth": "2022-07-29T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "Retraso en el desarrollo"
+    ],
+    "parentId": "2NyUf123cFMeV81SOhyAAqcZfgE3",
+    "parentEmail": "judithperalta@logros.com",
+    "representativeName": "Judith Peralta",
+    "representativeId": "",
+    "phoneNumber": "0996962150",
+    "therapistIds": [
+      "9wWRiOAyFZbyJdSqMKCd5flm3Pr2",
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2"
+    ],
+    "createdAt": "2025-12-05T00:14:30.000Z",
+    "active": true,
+    "color": "#10b981"
+  },
+  {
+    "id": "Sa5SFpRotHMJLPNJnlwV",
+    "firstName": "Matthew Santiago ",
+    "lastName": "Tobar Vera",
+    "dateOfBirth": "2021-02-23T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "No"
+    ],
+    "parentId": "9DCfxkKecHRt8hveKgMETaRqOJo2",
+    "parentEmail": "armidavera@logros.com",
+    "representativeName": "Armida Vera",
+    "representativeId": "",
+    "phoneNumber": "0961190936",
+    "therapistIds": [
+      "eE0yO7eolWhaAHWsHrs4O0nW3P92"
+    ],
+    "createdAt": "2025-12-04T18:52:21.000Z",
+    "active": true,
+    "color": "#10b981"
+  },
+  {
+    "id": "SgQDXxPLTZWRNbXtqxFH",
+    "firstName": "Emiliano Daniel ",
+    "lastName": "Murillo Freire",
+    "dateOfBirth": "2023-09-10T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "TDAH"
+    ],
+    "parentId": "Z96dvEuyPJUty9ALGuyaWdPcwsf1",
+    "parentEmail": "yarafreire@logros.com",
+    "representativeName": "Yara Freire ",
+    "representativeId": "",
+    "phoneNumber": "0939712847",
+    "therapistIds": [
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2",
+      "9wWRiOAyFZbyJdSqMKCd5flm3Pr2",
+      "9IlmcDvzQfc0Qcw1QG437y1n1ry2"
+    ],
+    "createdAt": "2025-12-06T03:18:43.000Z",
+    "active": true,
+    "color": "#10b981"
+  },
+  {
+    "id": "UDtTu0lfbB3TTi8jeTMx",
+    "firstName": "Valeria Alejandra ",
+    "lastName": "Solano Montesdeoca",
+    "dateOfBirth": "2016-12-07T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "Trastorno del sonido del habla"
+    ],
+    "parentId": "kmTZeKk2kwcj2gFPvezFkYSCPBQ2",
+    "parentEmail": "aliciamontes@logros.com",
+    "representativeName": "Alicia Montesdeoca",
+    "representativeId": "",
+    "phoneNumber": "0959871514",
+    "therapistIds": [
+      "eE0yO7eolWhaAHWsHrs4O0nW3P92"
+    ],
+    "createdAt": "2025-12-04T16:31:09.000Z",
+    "active": true,
+    "color": "#10b981"
+  },
+  {
+    "id": "VRY4UncTAWx3ijx3qMDi",
+    "firstName": "Thiago Matias",
+    "lastName": "Zambrano Perez",
+    "dateOfBirth": "2022-11-17T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "No"
+    ],
+    "parentId": "D1Kh445LePTywKi1xqYd6D0nbWI3",
+    "parentEmail": "brendaperez@logros.com",
+    "representativeName": "Brenda Perez",
+    "representativeId": "",
+    "phoneNumber": "0985658112",
+    "therapistIds": [
+      "9IlmcDvzQfc0Qcw1QG437y1n1ry2"
+    ],
+    "createdAt": "2025-12-04T19:10:28.000Z",
+    "active": true,
+    "color": "#10b981"
+  },
+  {
+    "id": "ZjpwnoVSOij7NPEZLsE6",
+    "firstName": "Kenneth Mauricio",
+    "lastName": "Henríquez Piguave",
+    "dateOfBirth": "2019-07-03T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "Autismo grado 1"
+    ],
+    "parentId": "q8a0x0MnPAYk2NmUuTRqajna4k42",
+    "parentEmail": "gladyspg@logros.com",
+    "representativeName": "Gladys Piguave ",
+    "representativeId": "",
+    "phoneNumber": "0995032368",
+    "createdAt": "2025-12-01T15:34:32.000Z",
+    "active": true,
+    "color": "#ccb128",
+    "therapistIds": [
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2",
+      "9IlmcDvzQfc0Qcw1QG437y1n1ry2",
+      "eE0yO7eolWhaAHWsHrs4O0nW3P92"
+    ]
+  },
+  {
+    "id": "aZKF9fuvLsodTpojVvKG",
+    "firstName": "Ryanna Aynoha ",
+    "lastName": "Santillan Guerrero",
+    "dateOfBirth": "2022-07-25T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "No"
+    ],
+    "parentId": "W6X5KHH6mSYMoM3Mfg2n8MXndoA2",
+    "parentEmail": "noemirihana@logros.com",
+    "representativeName": "Noemí Guerrero Fienco",
+    "representativeId": "",
+    "phoneNumber": "0979610232",
+    "therapistIds": [
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2",
+      "eE0yO7eolWhaAHWsHrs4O0nW3P92"
+    ],
+    "createdAt": "2025-12-09T21:08:45.000Z",
+    "active": true,
+    "color": "#10b981"
+  },
+  {
+    "id": "akgia3CFfuAB1BAsM5KO",
+    "firstName": "Sofía Victoria ",
+    "lastName": "Zambrano Campoverde",
+    "dateOfBirth": "2023-03-09T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "Hablante tardio"
+    ],
+    "parentId": "8uBVscKpFDRiIAcHfDpIXmFqBu53",
+    "representativeName": "Virginia Campoverde Reyes",
+    "representativeId": "",
+    "phoneNumber": "0999580621",
+    "therapistIds": [
+      "9IlmcDvzQfc0Qcw1QG437y1n1ry2",
+      "9wWRiOAyFZbyJdSqMKCd5flm3Pr2",
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2"
+    ],
+    "createdAt": "2025-12-06T03:03:14.000Z",
+    "active": true,
+    "color": "#10b981",
+    "visiblePassword": "virgi06222",
+    "parentEmail": "virginacamp@logros.com"
+  },
+  {
+    "id": "dMWbchHoDQF8ZwND91XN",
+    "firstName": "Benjamín ",
+    "lastName": "Tito",
+    "dateOfBirth": "2024-10-03T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "No"
+    ],
+    "parentId": "yAbTXq3xGFaxfmKrRjVRy7CdMG23",
+    "parentEmail": "andreapenaloza@logros.com",
+    "representativeName": "Andrea Peñaloza ",
+    "representativeId": "",
+    "phoneNumber": "090069914 ",
+    "therapistIds": [
+      "9wWRiOAyFZbyJdSqMKCd5flm3Pr2"
+    ],
+    "createdAt": "2025-12-13T22:35:14.000Z",
+    "color": "#10b981",
+    "active": false
+  },
+  {
+    "id": "m2iCRcbiQWEWraAgfkyg",
+    "firstName": "Maximiliano Ismael ",
+    "lastName": "Suraty Salazar",
+    "dateOfBirth": "2020-07-18T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "No"
+    ],
+    "parentId": "poPqGkc4omh3oRIpe0qurPahE9x2",
+    "parentEmail": "tamarasalazar@logros.com",
+    "representativeName": " Tamara Salazar",
+    "representativeId": "",
+    "phoneNumber": "0985800175",
+    "createdAt": "2025-12-04T19:25:03.000Z",
+    "active": true,
+    "color": "#10b981",
+    "therapistIds": [
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2",
+      "9IlmcDvzQfc0Qcw1QG437y1n1ry2",
+      "9wWRiOAyFZbyJdSqMKCd5flm3Pr2"
+    ]
+  },
+  {
+    "id": "sZPmvTJaerZpMtWdZeur",
+    "firstName": "Zoe Ariadna",
+    "lastName": "Barberan Pretente",
+    "dateOfBirth": "2021-05-15T00:00:00.000Z",
+    "patientId": "",
+    "diagnosis": [
+      "Autismo"
+    ],
+    "parentId": "PYskGpOzbPSnGGew03JDVap335Y2",
+    "parentEmail": "tatianapret@logros.com",
+    "representativeName": "Tatiana Pretente",
+    "representativeId": "",
+    "phoneNumber": "0986402707",
+    "therapistIds": [
+      "9IlmcDvzQfc0Qcw1QG437y1n1ry2",
+      "WBxcitwLLfZVb0mKshhmaJbqcJC2",
+      "9wWRiOAyFZbyJdSqMKCd5flm3Pr2"
+    ],
+    "createdAt": "2025-12-05T00:06:26.000Z",
+    "active": true,
+    "color": "#10b981"
+  }
+]

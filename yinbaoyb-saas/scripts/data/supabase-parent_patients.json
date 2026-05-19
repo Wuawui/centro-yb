@@ -1,0 +1,137 @@
+[
+  {
+    "parent_id": "a71d0d06-5682-4fb5-8cd8-6014d2195096",
+    "patient_id": "f4c9d8a2-177f-58f5-a792-05e61912d2d7",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "99f9f566-85ac-40e3-b119-babb1caea6d6",
+    "patient_id": "3f96115a-e59d-5790-8ef5-e229d677591d",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "5b16549b-ac2e-4a26-b64d-701be0111e61",
+    "patient_id": "341c392f-f0b9-5353-abf4-0a154410e05c",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "0fe95112-cc03-4429-b172-243da3f3399b",
+    "patient_id": "04515494-9b18-562f-bf9e-253e75404c12",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "4590b301-4047-46ba-bc92-ef4e6633e178",
+    "patient_id": "93977f8c-cad2-53a8-aa77-81b4e41af254",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "790a074e-c20f-4082-9c8e-01306f71ac69",
+    "patient_id": "5b7eb241-ff3b-5f7b-9fbf-fe2b20f31e23",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "cd3d130f-7a25-426c-a694-41ecc2dddd0d",
+    "patient_id": "0b8f6f4c-62e7-5661-91fa-6ef7e8d5cad7",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "9d8b6727-5c37-45ec-86d1-cde92a6ccc0e",
+    "patient_id": "d5d28d26-7bdd-5687-b9d9-d06cf1e2b425",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "953bc75d-911a-4c5e-9814-0d61f17d4a61",
+    "patient_id": "4c94738b-1711-5353-a287-74c6052ae4b3",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "be95b644-ec65-4cd1-8a47-137d5107e994",
+    "patient_id": "1a6f2548-a04d-5c77-9184-3fa541c5e948",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "0844183c-68c3-4cc9-98a4-d300f8556232",
+    "patient_id": "9d1d2a9f-bb5b-5072-b4ec-dd98a91c74f1",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "027cf391-1ebe-49c3-8ba7-35fd7d1a0570",
+    "patient_id": "9c6284ed-db67-5f88-854a-a9d3f9eb4481",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "933c2ffd-effa-4669-b7a3-6aba109c0950",
+    "patient_id": "c175bc7b-1c22-588c-97fc-7318247e6e98",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "6cd76c00-7597-4b9e-aebc-b22ca2f4c200",
+    "patient_id": "48acac1e-2896-5c5a-9b4b-0a8acb16c337",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  },
+  {
+    "parent_id": "3edb049f-59e1-4a0c-b3a3-ff455ba64b5a",
+    "patient_id": "7d200e3e-763b-5eb3-947f-70a43d8badf7",
+    "tenant_id": "00000000-0000-0000-0000-000000000001",
+    "relationship": "padre/madre",
+    "can_view_notes": true,
+    "can_view_scales": true,
+    "can_view_appointments": true
+  }
+]

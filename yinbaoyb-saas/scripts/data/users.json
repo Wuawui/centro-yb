@@ -1,0 +1,294 @@
+[
+  {
+    "id": "2NyUf123cFMeV81SOhyAAqcZfgE3",
+    "firstName": "Judith Peralta",
+    "email": "judithperalta@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-05T00:14:29.000Z",
+    "active": true
+  },
+  {
+    "id": "2UYYTvJQ2GQbfLWYpAcmdds9vhD2",
+    "firstName": "Juan",
+    "lastName": "Pérez",
+    "email": "padre@logros.com",
+    "role": "parent",
+    "specialization": "N/A",
+    "createdAt": "2026-02-05T03:49:24.000Z",
+    "active": true
+  },
+  {
+    "id": "4JNNkD8XpAPTXEbs3uSSGS9JdVA2",
+    "firstName": "Raul",
+    "email": "Mario@logros.com",
+    "role": "parent",
+    "createdAt": "2025-11-28T05:11:10.000Z",
+    "active": true
+  },
+  {
+    "id": "76LmLLXAB8YL5oGj6Bwa61Q8Waz1",
+    "firstName": "Ruth Portocarrero",
+    "email": "ruthportocarrero@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-01T15:52:29.000Z",
+    "active": true
+  },
+  {
+    "id": "8mNHW1KKqUeIH4CYadhP5dbAKPk2",
+    "firstName": "fart",
+    "email": "jesus@logros.com",
+    "role": "parent",
+    "createdAt": "2025-11-28T05:39:28.000Z",
+    "active": true
+  },
+  {
+    "id": "8uBVscKpFDRiIAcHfDpIXmFqBu53",
+    "firstName": "Virginia Campoverde Reyes",
+    "role": "parent",
+    "createdAt": "2025-12-06T03:03:13.000Z",
+    "active": true,
+    "visiblePassword": "virgi06222",
+    "email": "virginacamp@logros.com"
+  },
+  {
+    "id": "9DCfxkKecHRt8hveKgMETaRqOJo2",
+    "firstName": "Armida Vera",
+    "email": "armidavera@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-04T18:52:15.000Z",
+    "active": true
+  },
+  {
+    "id": "9IlmcDvzQfc0Qcw1QG437y1n1ry2",
+    "createdAt": "2025-11-28T22:06:15.000Z",
+    "firstName": "Sofia ",
+    "role": "therapist",
+    "active": true,
+    "email": "sofiafalcone@logros.com",
+    "specialization": "Psicología conductual",
+    "color": "#3bf75a",
+    "visiblePassword": "",
+    "lastName": "Falcone"
+  },
+  {
+    "id": "9wWRiOAyFZbyJdSqMKCd5flm3Pr2",
+    "createdAt": "2025-11-28T16:57:01.000Z",
+    "firstName": "Emily",
+    "lastName": "Macay",
+    "role": "therapist",
+    "active": true,
+    "specialization": "Terapia de Lenguaje",
+    "email": "emilymacay@logros.com",
+    "color": "#363c44"
+  },
+  {
+    "id": "B0qecq08FjcoBhQQ3pmTeNclvI33",
+    "firstName": "Admin",
+    "lastName": "Principal",
+    "role": "admin",
+    "active": true,
+    "specialization": "Administración",
+    "email": "admin@logros.com",
+    "createdAt": "2026-02-05T03:49:21.000Z"
+  },
+  {
+    "id": "D1Kh445LePTywKi1xqYd6D0nbWI3",
+    "firstName": "Brenda Perez",
+    "email": "brendaperez@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-04T19:10:26.000Z",
+    "active": true
+  },
+  {
+    "id": "EdVPxlHgFyXCDxvuqbNE59XDa5H3",
+    "firstName": "Carolina Pucay",
+    "email": "Carolinapu@logros.com",
+    "role": "parent",
+    "createdAt": "2026-01-28T00:12:29.000Z",
+    "active": true
+  },
+  {
+    "id": "Hh5G39mnJaazQ57dKSRLW3lAP623",
+    "firstName": "yyyyyyyy",
+    "email": "Luis@logros.com",
+    "role": "parent",
+    "createdAt": "2025-11-28T05:20:04.000Z",
+    "active": true
+  },
+  {
+    "id": "LRCorVJzUvOVCjUpyzBP5197H4l1",
+    "firstName": "Erika Reyna",
+    "email": "erikareyna@logors.com",
+    "role": "parent",
+    "createdAt": "2025-12-06T02:58:17.000Z",
+    "active": true
+  },
+  {
+    "id": "PYskGpOzbPSnGGew03JDVap335Y2",
+    "firstName": "Tatiana Pretente",
+    "email": "tatianapret@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-05T00:06:24.000Z",
+    "active": true
+  },
+  {
+    "id": "PcuJg1wPTWewbgqrPrJkV4KgDBI3",
+    "firstName": "josue",
+    "email": "johan@logros.com",
+    "role": "parent",
+    "createdAt": "2025-11-28T00:50:53.000Z",
+    "active": false
+  },
+  {
+    "id": "QhKl77br5cahEn4UEz6RujhBiUp2",
+    "firstName": "Katherin Pinto ",
+    "email": "kathepinto@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-01T15:43:48.000Z",
+    "active": true
+  },
+  {
+    "id": "W6X5KHH6mSYMoM3Mfg2n8MXndoA2",
+    "firstName": "Noemí Guerrero Fienco",
+    "email": "noemirihana@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-09T21:08:44.000Z",
+    "active": true
+  },
+  {
+    "id": "WBxcitwLLfZVb0mKshhmaJbqcJC2",
+    "active": "true",
+    "email": "mirellasugei@logros.com",
+    "role": "admin",
+    "specialization": "Administración"
+  },
+  {
+    "id": "X4d03hgNIpTPGtWU8YsYoeV06153",
+    "firstName": "Juan",
+    "lastName": "Pérez",
+    "email": "padre@logros.com",
+    "role": "parent",
+    "specialization": "N/A",
+    "createdAt": "2025-11-27T22:35:56.000Z",
+    "active": true
+  },
+  {
+    "id": "XGpglkbnqMPQLGHH1pVa58OlJj73",
+    "firstName": "Mercedes Mecha",
+    "email": "mechamer@logros.com",
+    "role": "accountant",
+    "createdAt": "2025-12-04T16:35:11.000Z",
+    "active": true
+  },
+  {
+    "id": "Z96dvEuyPJUty9ALGuyaWdPcwsf1",
+    "firstName": "Yara Freire ",
+    "email": "yarafreire@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-06T03:18:40.000Z",
+    "active": true
+  },
+  {
+    "id": "ZorpADfKrEQKLLhnlJLaz8ouW3b2",
+    "firstName": "ffffff",
+    "email": "Jess@logros.com",
+    "role": "parent",
+    "createdAt": "2025-11-28T05:24:15.000Z",
+    "active": true
+  },
+  {
+    "id": "eE0yO7eolWhaAHWsHrs4O0nW3P92",
+    "createdAt": "2025-11-28T16:44:18.000Z",
+    "firstName": "Nicol ",
+    "lastName": "Plaza ",
+    "role": "therapist",
+    "active": true,
+    "specialization": "Terapia de Lenguaje",
+    "email": "plazatnicol@logros.com"
+  },
+  {
+    "id": "kmTZeKk2kwcj2gFPvezFkYSCPBQ2",
+    "firstName": "Alicia Montesdeoca",
+    "email": "aliciamontes@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-04T16:31:08.000Z",
+    "active": true
+  },
+  {
+    "id": "lEZndtd4RYdYzEVfFjEpRfek7AW2",
+    "createdAt": "2026-01-06T03:45:23.000Z",
+    "firstName": "mirella",
+    "lastName": "Moran ",
+    "role": "therapist",
+    "color": "#3b82f6",
+    "active": true,
+    "specialization": "Terapia Ocupacional",
+    "email": "mirellamoran@logros.com",
+    "visiblePassword": "amormio"
+  },
+  {
+    "id": "lzBkz0iip8SljFIz7YaeiJqZYX73",
+    "firstName": "Nicole Espinoza",
+    "email": "nicolespi@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-05T00:10:10.000Z",
+    "active": true
+  },
+  {
+    "id": "omTqJOegpRSZ9EwOCwpwMZE49Zq1",
+    "firstName": "José Flores ",
+    "email": "joseflores@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-01T15:21:02.000Z",
+    "active": true
+  },
+  {
+    "id": "poPqGkc4omh3oRIpe0qurPahE9x2",
+    "firstName": " Tamara Salazar",
+    "email": "tamarasalazar@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-04T19:25:01.000Z",
+    "active": true
+  },
+  {
+    "id": "q8a0x0MnPAYk2NmUuTRqajna4k42",
+    "firstName": "Gladys Piguave ",
+    "email": "gladyspg@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-01T15:34:30.000Z",
+    "active": true
+  },
+  {
+    "id": "rwH5dPrf3tgLUNtYOejzfwQ7pKn1",
+    "firstName": "Noemí Guerrero Fienco",
+    "email": "noemiguerrerof@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-01T15:06:42.000Z",
+    "active": true,
+    "visiblePassword": "noemi1234"
+  },
+  {
+    "id": "u9otncEk9LgZCH6wQPipcs3yI8d2",
+    "firstName": "Maria",
+    "email": "mariaS@logros.com",
+    "role": "parent",
+    "createdAt": "2025-11-27T22:02:22.000Z",
+    "active": false
+  },
+  {
+    "id": "yAbTXq3xGFaxfmKrRjVRy7CdMG23",
+    "firstName": "Andrea Peñaloza ",
+    "email": "andreapenaloza@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-13T22:35:12.000Z",
+    "active": false
+  },
+  {
+    "id": "z75InnBnujb7t6dTjuRoqjXAT1T2",
+    "firstName": "Lissette  Guambuguete ",
+    "email": "lisseteguambu@logros.com",
+    "role": "parent",
+    "createdAt": "2025-12-06T02:39:06.000Z",
+    "active": true
+  }
+]
