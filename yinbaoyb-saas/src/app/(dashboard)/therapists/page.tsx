@@ -65,32 +65,54 @@ export default function TherapistsPage() {
     max_patients: 20,
   });
   const [approachInput, setApproachInput] = useState("");
+  const [emailDomain, setEmailDomain] = useState("gmail.com");
 
   useEffect(() => { loadTherapists(); }, []);
 
+  useEffect(() => {
+    async function loadDomain() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          const domain = session.user.email.includes("@") ? session.user.email.split("@")[1] : "gmail.com";
+          setEmailDomain(domain);
+        }
+      } catch (e) {
+        console.error("Error loading email domain in therapists page:", e);
+      }
+    }
+    loadDomain();
+  }, []);
+
   async function loadTherapists() {
     setLoading(true);
+    setError(null);
+    try {
+      // Cargar therapists y profiles en PARALELO
+      const [therapistsRes, profilesRes] = await Promise.all([
+        supabase.from("therapists").select("id, specialty, license_number, certifications, therapeutic_approach, max_patients, active").order("active", { ascending: false }),
+        supabase.rpc("get_therapist_profiles"),
+      ]);
 
-    // Cargar therapists y profiles en PARALELO
-    const [therapistsRes, profilesRes] = await Promise.all([
-      supabase.from("therapists").select("id, specialty, license_number, certifications, therapeutic_approach, max_patients, active").order("active", { ascending: false }),
-      supabase.rpc("get_therapist_profiles"),
-    ]);
+      if (therapistsRes.error || !therapistsRes.data) {
+        setTherapists([]);
+        setError(therapistsRes.error?.message || "No se pudieron cargar los datos de los terapeutas.");
+        return;
+      }
 
-    if (therapistsRes.error || !therapistsRes.data) {
-      setTherapists([]);
+      const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+      const combined = therapistsRes.data.map((t: any) => ({
+        ...t,
+        profiles: profileMap.get(t.id) || null,
+      }));
+
+      setTherapists(combined as unknown as TherapistData[]);
+    } catch (err: any) {
+      console.error("Error fetching therapists:", err);
+      setError("Error de red: no se pudo establecer conexión con el servidor.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
-    const combined = therapistsRes.data.map((t: any) => ({
-      ...t,
-      profiles: profileMap.get(t.id) || null,
-    }));
-
-    setTherapists(combined as unknown as TherapistData[]);
-    setLoading(false);
   }
 
   // Get patient count for each therapist
@@ -142,6 +164,9 @@ export default function TherapistsPage() {
         return;
       }
 
+      // Create user via admin API with custom domain suffix
+      const finalEmail = form.email.includes("@") ? form.email.trim() : `${form.email.trim()}@${emailDomain}`;
+
       // Create user via admin API (uses service_role internally)
       const res = await fetch("/api/admin/create-user", {
         method: "POST",
@@ -150,7 +175,7 @@ export default function TherapistsPage() {
           "Authorization": `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          email: form.email,
+          email: finalEmail,
           password: form.password,
           first_name: form.first_name,
           last_name: form.last_name,
@@ -266,7 +291,24 @@ export default function TherapistsPage() {
           <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Nombres *</label><input required value={form.first_name} onChange={e => setForm({...form, first_name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Ana" /></div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Apellidos *</label><input required value={form.last_name} onChange={e => setForm({...form, last_name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="García López" /></div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Email *</label><input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="ana@centro.com" /></div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <div className="relative flex rounded-lg shadow-sm">
+                <input 
+                  type="text" 
+                  required 
+                  value={form.email} 
+                  onChange={e => setForm({...form, email: e.target.value})} 
+                  className="block w-full pl-3 pr-32 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none" 
+                  placeholder="ej: ana" 
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <span className="text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 select-none">
+                    @{emailDomain}
+                  </span>
+                </div>
+              </div>
+            </div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label><input type="password" required minLength={6} value={form.password} onChange={e => setForm({...form, password: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Mínimo 6 caracteres" /></div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label><input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="+593 99 999 9999" /></div>
             <div><label className="block text-sm font-medium text-gray-700 mb-1">Especialidad</label><input value={form.specialty} onChange={e => setForm({...form, specialty: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Psicología Clínica" /></div>

@@ -65,11 +65,21 @@ export default function ClinicalPage() {
       return;
     }
     setLoading(true);
-    const { data } = await supabase.from("patients").select("id, first_name, last_name, status, active").eq("active", true).eq("tenant_id", tenantId).order("first_name");
-    setPatients(data || []);
-    const { data: scalesData } = await supabase.from("clinical_scales").select("id, name, acronym, max_score, risk_threshold").eq("tenant_id", tenantId);
-    setScales(scalesData || []);
-    setLoading(false);
+    setError(null);
+    try {
+      const { data, error: pErr } = await supabase.from("patients").select("id, first_name, last_name, status, active").eq("active", true).eq("tenant_id", tenantId).order("first_name");
+      if (pErr) throw pErr;
+      setPatients(data || []);
+
+      const { data: scalesData, error: sErr } = await supabase.from("clinical_scales").select("id, name, acronym, max_score, risk_threshold").eq("tenant_id", tenantId);
+      if (sErr) throw sErr;
+      setScales(scalesData || []);
+    } catch (err: any) {
+      console.error("Error loading clinical data:", err);
+      setError("Error de conexión: no se pudieron cargar los datos clínicos.");
+    } finally {
+      setLoading(false);
+    }
   }, [tenantId, user?.id]);
 
   useEffect(() => { loadData(); }, [loadData]);
@@ -194,23 +204,25 @@ export default function ClinicalPage() {
 
           {/* Acciones rápidas */}
           {selectedPatient && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2">
-              <h2 className="text-sm font-semibold text-gray-900 mb-2">⚡ Acciones</h2>
-              <button onClick={() => { setMode("note"); setNoteFormat("SOAP"); }} className="w-full text-left px-3 py-2.5 rounded-lg text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors flex items-center gap-2">
-                📝 Nueva nota SOAP
+            <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
+              <h2 className="text-sm font-semibold text-gray-900 border-b border-gray-100 pb-2 mb-2">⚡ Acciones Rápidas</h2>
+              <button 
+                onClick={() => { 
+                  setMode("note"); 
+                  if (!noteFormat) setNoteFormat("SOAP"); 
+                }} 
+                className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md shadow-indigo-100 transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                📝 Registrar Nota
               </button>
-              <button onClick={() => { setMode("note"); setNoteFormat("progreso"); }} className="w-full text-left px-3 py-2.5 rounded-lg text-sm bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors flex items-center gap-2">
-                📈 Nota de progreso
-              </button>
-              <button onClick={() => { setMode("note"); setNoteFormat("BIRP"); }} className="w-full text-left px-3 py-2.5 rounded-lg text-sm bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors flex items-center gap-2">
-                🔄 Nota BIRP
-              </button>
-              <button onClick={() => { setMode("scale"); }} className="w-full text-left px-3 py-2.5 rounded-lg text-sm bg-green-50 text-green-700 hover:bg-green-100 transition-colors flex items-center gap-2">
-                📊 Aplicar escala
-              </button>
-              <Link href={`/patients/${selectedPatient.id}`} className="w-full text-left px-3 py-2.5 rounded-lg text-sm bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors flex items-center gap-2">
-                👤 Ver ficha del paciente
-              </Link>
+              <div className="grid grid-cols-1 gap-2 pt-1">
+                <button onClick={() => { setMode("scale"); }} className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100/70 border border-emerald-100/50 transition-colors flex items-center gap-2 cursor-pointer">
+                  📊 Aplicar escala
+                </button>
+                <Link href={`/patients/${selectedPatient.id}`} className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-100/60 transition-colors flex items-center gap-2">
+                  👤 Ver ficha del paciente
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -342,13 +354,32 @@ export default function ClinicalPage() {
                 <button onClick={() => setMode("overview")} className="text-gray-400 hover:text-gray-600">✕</button>
               </div>
 
-              {/* Selector de formato */}
-              <div className="flex flex-wrap gap-2 mb-5">
-                {Object.entries(formatConfig).map(([key, cfg]) => (
-                  <button key={key} onClick={() => { setNoteFormat(key); setNoteFields({}); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${noteFormat === key ? cfg.color : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}>
-                    {cfg.icon} {cfg.label}
-                  </button>
-                ))}
+              {/* Selector de formato estilo Tab Bar Segmentado */}
+              <div className="mb-6">
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Formato de la Nota</label>
+                <div className="bg-gray-100/80 backdrop-blur-sm p-1 rounded-xl flex flex-wrap gap-1 border border-gray-200/50">
+                  {Object.entries(formatConfig).map(([key, cfg]) => {
+                    const isActive = noteFormat === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          setNoteFormat(key);
+                          setNoteFields({});
+                        }}
+                        className={`flex-1 min-w-[70px] text-center px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+                          isActive
+                            ? "bg-white text-indigo-700 shadow-sm border border-gray-200/30"
+                            : "text-gray-500 hover:text-gray-700 hover:bg-white/40"
+                        }`}
+                      >
+                        <span className="text-sm leading-none">{cfg.icon}</span>
+                        <span>{cfg.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Campos dinámicos */}

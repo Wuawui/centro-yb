@@ -122,8 +122,25 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         }
 
         // Fetch tenant branding
-        if (prof?.tenant_id) {
-          const { data: t } = await supabase.from("tenants").select("name, primary_color").eq("id", prof.tenant_id).single();
+        let brandingTenantId = prof?.tenant_id;
+
+        if (prof?.role === "padre") {
+          try {
+            const { data: linkedPatients } = await supabase
+              .from("parent_patients")
+              .select("tenant_id")
+              .eq("parent_id", session.user.id)
+              .limit(1);
+            if (linkedPatients && linkedPatients.length > 0) {
+              brandingTenantId = linkedPatients[0].tenant_id;
+            }
+          } catch (e) {
+            console.error("Error fetching linked patient tenant branding:", e);
+          }
+        }
+
+        if (brandingTenantId) {
+          const { data: t } = await supabase.from("tenants").select("name, primary_color").eq("id", brandingTenantId).single();
           if (t && !cancelled) {
             setTenantName(t.name || "CentroYB");
             setTenantColor(t.primary_color || "#4F46E5");
@@ -184,7 +201,23 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshTenant = useCallback(async () => {
-    const tid = profile?.tenant_id;
+    let tid = profile?.tenant_id;
+
+    if (profile?.role === "padre") {
+      try {
+        const { data: linked } = await supabase
+          .from("parent_patients")
+          .select("tenant_id")
+          .eq("parent_id", user?.id)
+          .limit(1);
+        if (linked && linked.length > 0) {
+          tid = linked[0].tenant_id;
+        }
+      } catch (e) {
+        console.error("Error refreshing tenant for parent:", e);
+      }
+    }
+
     if (!tid) return;
     const { data: t } = await supabase.from("tenants").select("name, primary_color").eq("id", tid).single();
     if (t) {
@@ -192,7 +225,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setTenantColor(t.primary_color || "#4F46E5");
       _tenantCache = { name: t.name || "CentroYB", color: t.primary_color || "#4F46E5", loadedAt: Date.now() };
     }
-  }, [profile?.tenant_id]);
+  }, [profile?.tenant_id, profile?.role, user?.id]);
 
   const role = (profile?.role as UserRole) ?? null;
   const tenantInitials = tenantName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() || "YB";

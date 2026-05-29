@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
   const userTenantId = tenant_id || userProfile.tenant_id;
 
-  // Crear usuario con service_role
+  // Crear usuario con service_role usando el email ingresado por el administrador
   const createRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
     method: "POST",
     headers: {
@@ -61,8 +61,16 @@ export async function POST(request: Request) {
   const userData = await createRes.json();
 
   if (!createRes.ok) {
-    // Si ya existe, buscarlo
-    if (userData.msg?.includes("already registered") || userData.msg?.includes("already exists")) {
+    const errorMsg = (userData.msg || userData.message || "").toLowerCase();
+    // Si ya existe, buscarlo (soportando localización en inglés, español y códigos estándar)
+    if (
+      errorMsg.includes("already registered") || 
+      errorMsg.includes("already exists") || 
+      errorMsg.includes("ya ha sido registrado") || 
+      errorMsg.includes("ya existe") ||
+      errorMsg.includes("email_exists") ||
+      errorMsg.includes("correo electronico ya")
+    ) {
       // Buscar usuario existente
       const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(email)}`, {
         headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },

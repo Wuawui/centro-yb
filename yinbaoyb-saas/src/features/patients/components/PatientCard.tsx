@@ -20,6 +20,7 @@ interface PatientCardProps {
   accentColor?: string;
   showReason?: boolean;
   showAge?: boolean;
+  showPhone?: boolean;
 }
 
 export function PatientCard({
@@ -28,6 +29,7 @@ export function PatientCard({
   accentColor = "bg-indigo-100 text-indigo-600",
   showReason = false,
   showAge = false,
+  showPhone = true,
 }: PatientCardProps) {
   const status = PATIENT_STATUS_CONFIG[p.status] || { label: p.status, color: "bg-gray-50 text-gray-600" };
   const age = showAge && p.date_of_birth
@@ -55,7 +57,7 @@ export function PatientCard({
         )}
         <div className="flex items-center gap-2 mt-0.5">
           {age !== null && <span className="text-xs text-gray-400">{age} años</span>}
-          {p.phone && <span className="text-xs text-gray-400">· {p.phone}</span>}
+          {showPhone && p.phone && <span className="text-xs text-gray-400">· {p.phone}</span>}
         </div>
       </div>
       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>

@@ -73,12 +73,22 @@ export default function TherapistClinicalPage() {
       form.recomendaciones.trim() ? `**Recomendaciones para Casa:**\n${form.recomendaciones.trim()}` : null,
     ].filter(Boolean).join("\n\n");
 
+    const timestampStr = new Date().toLocaleString("es-EC", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+    const finalContent = `${combinedContent}\n\n---\n*Nota registrada el ${timestampStr}*`;
+
     const { error } = await createClinicalNote(supabase, {
       tenant_id: tenantId,
       patient_id: form.patient_id,
       therapist_id: user.id,
       format: "libre",
-      content: combinedContent,
+      content: finalContent,
       signed: false,
     });
 
@@ -261,7 +271,7 @@ export default function TherapistClinicalPage() {
                       </button>
                     )}
                     <span className="text-xs text-gray-400">
-                      {new Date(note.created_at).toLocaleDateString("es-EC", { day: "numeric", month: "short", year: "numeric" })}
+                      {new Date(note.created_at).toLocaleDateString("es-EC", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                 </div>

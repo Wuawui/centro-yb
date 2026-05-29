@@ -101,6 +101,7 @@ export default function TherapistPatientsPage() {
               accentColor="bg-teal-100 text-teal-700"
               showReason
               showAge
+              showPhone={false}
             />
           ))}
         </div>

@@ -119,6 +119,7 @@ export function Sidebar({
                     <Link
                       key={item.name}
                       href={item.href}
+                      data-tour={`sidebar-${item.name.toLowerCase().replace(/\s+/g, "-")}`}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
                         "group flex items-center gap-3.5 rounded-[1.125rem] px-4 py-2.5 text-[13.5px] font-medium transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]",

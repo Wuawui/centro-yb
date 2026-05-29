@@ -25,12 +25,135 @@ export default function TherapistPatientDetailPage() {
   const [notes, setNotes] = useState<ClinicalNote[]>([]);
   const [scales, setScales] = useState<ScaleResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"appointments" | "notes" | "scales">("notes");
+  const [activeTab, setActiveTab] = useState<"appointments" | "notes" | "scales" | "evaluaciones">("notes");
 
   // Form for new note
   const [showNewNote, setShowNewNote] = useState(false);
   const [saving, setSaving] = useState(false);
   const [noteForm, setNoteForm] = useState({ tareas: "", observaciones: "", resultados: "", recomendaciones: "" });
+
+  // Evaluation upload state
+  const [uploadingEval, setUploadingEval] = useState(false);
+  const [evalFile, setEvalFile] = useState<File | null>(null);
+  const [evalError, setEvalError] = useState<string | null>(null);
+
+  const isEvaluation = (content: string) => {
+    return content.trim().startsWith('{"type":"evaluacion"');
+  };
+
+  const parseEvaluation = (content: string) => {
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const handleUploadEvaluation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!evalFile) return;
+    setUploadingEval(true);
+    setEvalError(null);
+
+    // Max 5MB check
+    if (evalFile.size > 5242880) {
+      setEvalError("El archivo no debe superar los 5MB.");
+      setUploadingEval(false);
+      return;
+    }
+
+    // Strict extension check
+    const allowedExtensions = [".pdf", ".doc", ".docx"];
+    const fileExt = evalFile.name.substring(evalFile.name.lastIndexOf(".")).toLowerCase();
+    if (!allowedExtensions.includes(fileExt)) {
+      setEvalError("Solo se permiten archivos PDF o Word (.doc, .docx).");
+      setUploadingEval(false);
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: prof } = await supabase.from("profiles").select("tenant_id").eq("id", user!.id).single();
+      
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+        const payload = JSON.stringify({
+          type: "evaluacion",
+          file_name: evalFile.name,
+          file_size: evalFile.size,
+          file_type: evalFile.type,
+          file_data: base64Data
+        });
+
+        const { error } = await supabase.from("clinical_notes").insert({
+          tenant_id: prof!.tenant_id,
+          patient_id: params.id as string,
+          therapist_id: user!.id,
+          format: "libre",
+          content: payload,
+          signed: false
+        });
+
+        if (error) {
+          setEvalError("Error al guardar en base de datos: " + error.message);
+          setUploadingEval(false);
+          return;
+        }
+
+        setEvalFile(null);
+        setUploadingEval(false);
+        // Reload notes
+        const { data } = await supabase.from("clinical_notes").select("id, format, content, signed, created_at").eq("tenant_id", prof!.tenant_id).eq("patient_id", params.id as string).eq("therapist_id", user!.id).order("created_at", { ascending: false }).limit(20);
+        setNotes((data || []) as ClinicalNote[]);
+      };
+      reader.onerror = () => {
+        setEvalError("Error al leer el archivo.");
+        setUploadingEval(false);
+      };
+      reader.readAsDataURL(evalFile);
+    } catch (err: any) {
+      setEvalError(err.message || "Error al subir.");
+      setUploadingEval(false);
+    }
+  };
+
+  const downloadFile = (fileJsonStr: string) => {
+    try {
+      const fileObj = JSON.parse(fileJsonStr);
+      const link = document.createElement("a");
+      link.href = fileObj.file_data;
+      link.download = fileObj.file_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      alert("Error al descargar el archivo");
+    }
+  };
+
+  const handleToggleSharePortal = async (itemId: string, currentContent: string) => {
+    try {
+      const evalObj = JSON.parse(currentContent);
+      const newShared = !evalObj.shared;
+      evalObj.shared = newShared;
+      const updatedContent = JSON.stringify(evalObj);
+
+      const { error: err } = await supabase
+        .from("clinical_notes")
+        .update({ content: updatedContent })
+        .eq("id", itemId);
+
+      if (err) {
+        alert("Error al actualizar visibilidad: " + err.message);
+        return;
+      }
+
+      window.location.reload();
+    } catch (e) {
+      alert("Error al procesar el archivo");
+    }
+  };
 
   useEffect(() => {
     async function load() {
@@ -90,6 +213,9 @@ export default function TherapistPatientDetailPage() {
 
   const age = patient.date_of_birth ? Math.floor((Date.now() - new Date(patient.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : null;
 
+  const clinicalNotesList = notes.filter(n => !isEvaluation(n.content));
+  const evaluationsList = notes.filter(n => isEvaluation(n.content));
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -99,7 +225,6 @@ export default function TherapistPatientDetailPage() {
           <h1 className="text-2xl font-bold text-gray-900">{patient.first_name} {patient.last_name}</h1>
           <div className="flex items-center gap-3 mt-1">
             {age !== null && <span className="text-sm text-gray-500">{age} años</span>}
-            {patient.phone && <span className="text-sm text-gray-500">📞 {patient.phone}</span>}
             {patient.email && <span className="text-sm text-gray-500">✉️ {patient.email}</span>}
           </div>
         </div>
@@ -131,8 +256,9 @@ export default function TherapistPatientDetailPage() {
         <nav className="flex gap-6">
           {[
             { key: "appointments", label: "Citas", count: appointments.length },
-            { key: "notes", label: "Notas Clínicas", count: notes.length },
+            { key: "notes", label: "Notas Clínicas", count: clinicalNotesList.length },
             { key: "scales", label: "Escalas", count: scales.length },
+            { key: "evaluaciones", label: "Subir Evaluaciones", count: evaluationsList.length },
           ].map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key as any)} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.key ? "border-teal-600 text-teal-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
               {tab.label} ({tab.count})
@@ -200,9 +326,9 @@ export default function TherapistPatientDetailPage() {
             </div>
           )}
 
-          {notes.length === 0 ? (
+          {clinicalNotesList.length === 0 ? (
             <div className="text-center py-8 bg-white rounded-xl border border-gray-200"><div className="text-3xl mb-2">📋</div><p className="text-sm text-gray-500">Sin notas clínicas aún</p><p className="text-xs text-gray-400 mt-1">Registra la evolución después de cada sesión</p></div>
-          ) : notes.map(note => (
+          ) : clinicalNotesList.map(note => (
             <div key={note.id} className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700">{noteLabels[note.format?.toLowerCase()] || note.format}</span>
@@ -240,6 +366,122 @@ export default function TherapistPatientDetailPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Evaluations tab — SUBIR Y VER EVALUACIONES */}
+      {activeTab === "evaluaciones" && (
+        <div className="space-y-6">
+          {/* Formulario de carga de evaluación */}
+          <div className="bg-white rounded-xl border border-teal-100 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 font-outfit">Subir Nueva Evaluación</h3>
+            <form onSubmit={handleUploadEvaluation} className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-teal-500 transition-colors bg-gray-50">
+                <input
+                  type="file"
+                  id="eval-file-input"
+                  accept=".pdf,.doc,.docx"
+                  onChange={e => {
+                    if (e.target.files && e.target.files[0]) {
+                      setEvalFile(e.target.files[0]);
+                    }
+                  }}
+                  className="hidden"
+                />
+                <label htmlFor="eval-file-input" className="cursor-pointer space-y-2 block">
+                  <div className="text-4xl text-gray-400">📁</div>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {evalFile ? evalFile.name : "Seleccionar o arrastrar archivo de evaluación"}
+                  </p>
+                  <p className="text-xs text-gray-400">Formatos permitidos: PDF y Word (.doc, .docx). Máximo 5MB.</p>
+                </label>
+              </div>
+
+              {evalError && (
+                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-1.5">{evalError}</p>
+              )}
+
+              {evalFile && (
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEvalFile(null)}
+                    className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Descartar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={uploadingEval}
+                    className="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50"
+                  >
+                    {uploadingEval ? "Subiendo..." : "Subir Documento"}
+                  </button>
+                </div>
+              )}
+            </form>
+          </div>
+
+          {/* Listado de evaluaciones */}
+          <div className="space-y-3">
+            {evaluationsList.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                <div className="text-4xl mb-3">📁</div>
+                <h4 className="text-base font-semibold text-gray-900 mb-1">Sin evaluaciones subidas</h4>
+                <p className="text-sm text-gray-500">Aquí se listarán las evaluaciones psicológicas o psicopedagógicas.</p>
+              </div>
+            ) : (
+              evaluationsList.map(item => {
+                const evalData = parseEvaluation(item.content);
+                if (!evalData) return null;
+                const formattedSize = evalData.file_size
+                  ? `${(evalData.file_size / 1024).toFixed(1)} KB`
+                  : "N/A";
+                const isPdf = evalData.file_name?.toLowerCase().endsWith(".pdf");
+                const isShared = !!evalData.shared;
+
+                return (
+                  <div key={item.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 ${isPdf ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"}`}>
+                        {isPdf ? "PDF" : "DOC"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 text-sm truncate">{evalData.file_name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-gray-400">{new Date(item.created_at).toLocaleDateString("es-EC")} · {formattedSize}</span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                            isShared ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"
+                          }`}>
+                            {isShared ? "👁️ Compartido en Portal" : "🔒 Privado (Solo Centro)"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => downloadFile(item.content)}
+                        className="px-3 py-1.5 text-xs font-semibold text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50 transition-colors"
+                      >
+                        Descargar
+                      </button>
+
+                      <button 
+                        onClick={() => item.content && handleToggleSharePortal(item.id, item.content)}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                          isShared 
+                            ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100" 
+                            : "bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100"
+                        }`}
+                      >
+                        {isShared ? "Quitar del Portal 🔒" : "Publicar al Portal 📤"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
     </div>

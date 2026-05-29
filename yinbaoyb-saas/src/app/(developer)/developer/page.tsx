@@ -3,6 +3,29 @@
 import { useEffect, useState } from "react";
 import { getAllTenants, toggleTenantStatus, createNewTenant } from "./actions";
 import { Building2, Plus, Zap, CheckCircle2, XCircle, MoreVertical, CreditCard } from "lucide-react";
+import { TutorialModal } from "@/components/ui/TutorialModal";
+import { InteractiveTour, type TourStep } from "@/components/ui/InteractiveTour";
+
+const TOUR_STEPS: TourStep[] = [
+  {
+    target: "#tour-dev-header",
+    title: "🛠️ Panel Global del SaaS",
+    content: "¡Te damos la bienvenida a tu centro de control de desarrollador! Aquí monitoreas y administras a todas las clínicas del país que usan tu software.",
+    placement: "bottom"
+  },
+  {
+    target: "#tour-dev-actions",
+    title: "🚀 Acciones de Licencias",
+    content: "Usa el botón 'Nueva Instancia' para registrar un consultorio en 1 segundo o abre el manual rápido con 'Tutorial'.",
+    placement: "bottom"
+  },
+  {
+    target: "#tour-dev-table",
+    title: "📋 Listado de Instancias",
+    content: "Audita qué centros terapéuticos están utilizando tu software, qué planes tienen suscritos (Básico, Profesional, Avanzado) y su estado actual.",
+    placement: "top"
+  }
+];
 
 export default function DeveloperPage() {
   const [tenants, setTenants] = useState<any[]>([]);
@@ -11,6 +34,8 @@ export default function DeveloperPage() {
   const [formData, setFormData] = useState({ name: "", slug: "", plan: "basico", adminEmail: "", adminName: "", adminPassword: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
     loadTenants();
@@ -60,21 +85,29 @@ export default function DeveloperPage() {
     <div className="space-y-8">
       {/* Header section */}
       <div className="flex items-center justify-between">
-        <div>
+        <div id="tour-dev-header">
           <h1 className="text-3xl font-bold tracking-tight">Centros Terapéuticos</h1>
           <p className="text-neutral-400 mt-1">Gestión global de clientes e instancias SaaS.</p>
         </div>
-        <button 
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-white text-black px-4 py-2.5 rounded-xl font-medium hover:bg-neutral-200 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Nueva Instancia
-        </button>
+        <div id="tour-dev-actions" className="flex items-center gap-3">
+          <button 
+            onClick={() => setShowTutorial(true)}
+            className="flex items-center gap-2 bg-neutral-800 text-neutral-200 border border-neutral-700 px-4 py-2.5 rounded-xl font-medium hover:bg-neutral-700 transition-colors cursor-pointer"
+          >
+            📖 Tutorial
+          </button>
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 bg-white text-black px-4 py-2.5 rounded-xl font-medium hover:bg-neutral-200 transition-colors cursor-pointer"
+          >
+            <Plus className="w-5 h-5" />
+            Nueva Instancia
+          </button>
+        </div>
       </div>
 
       {/* Tenants Table */}
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-2xl">
+      <div id="tour-dev-table" className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-950/50 border-b border-neutral-800 text-neutral-400">
@@ -245,6 +278,9 @@ export default function DeveloperPage() {
           </div>
         </div>
       )}
+      
+      <TutorialModal role="developer" isOpen={showTutorial} onClose={() => setShowTutorial(false)} onStartTour={() => setShowTour(true)} />
+      <InteractiveTour steps={TOUR_STEPS} isOpen={showTour} onClose={() => setShowTour(false)} accentColor="neutral-800" />
     </div>
   );
 }

@@ -40,17 +40,23 @@ export default function PatientsPage() {
     if (!tenantId) { setLoading(false); return; }
     setLoading(true);
     setErrorMsg(null);
-    const { data, error } = await supabase
-      .from("patients")
-      .select("id, first_name, last_name, document_number, phone, email, status, primary_diagnosis, primary_diagnosis_desc, active, created_at")
-      .eq("tenant_id", tenantId)
-      .order("created_at", { ascending: false });
-    if (error) {
-      setErrorMsg(`Error: ${error.message}`);
-    } else {
-      setPatients(data || []);
+    try {
+      const { data, error } = await supabase
+        .from("patients")
+        .select("id, first_name, last_name, document_number, phone, email, status, primary_diagnosis, primary_diagnosis_desc, active, created_at")
+        .eq("tenant_id", tenantId)
+        .order("created_at", { ascending: false });
+      if (error) {
+        setErrorMsg(`Error: ${error.message}`);
+      } else {
+        setPatients(data || []);
+      }
+    } catch (err: any) {
+      console.error("Error fetching patients:", err);
+      setErrorMsg(`Error de conexión: no se pudieron cargar los datos de pacientes.`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   const activePatients = patients.filter(p => p.active !== false);

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { BrainCircuit, ShieldCheck, MapPin } from "lucide-react";
+import { ShieldCheck, MapPin, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { BearLogo } from "@/components/ui/BearLogo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const supabase = createClient();
 
@@ -35,186 +37,181 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-[family-name:var(--font-inter)] selection:bg-yellow-500/30">
-      {/* ───────────────────────────────────────────────────────── */}
-      {/* LEFT PANEL : BRANDING (Hidden on Mobile) */}
-      {/* ───────────────────────────────────────────────────────── */}
-      <div className="hidden lg:flex w-1/2 bg-[#111827] text-white p-12 flex-col justify-between relative overflow-hidden">
-        {/* Subtle Background Glow */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-yellow-500/5 rounded-full blur-[100px] pointer-events-none translate-y-1/2 -translate-x-1/4" />
+    <div className="flex min-h-screen bg-gradient-to-tr from-teal-500/10 via-[#F3FAF8] to-white font-[family-name:var(--font-inter)] selection:bg-teal-500/30 items-center justify-center relative overflow-hidden p-6">
+      {/* Glow clinical ambient lights in background */}
+      <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-teal-400/10 rounded-full blur-[140px] pointer-events-none -translate-y-1/3 translate-x-1/3 animate-glow-emerald" />
+      <div className="absolute bottom-0 left-0 w-[550px] h-[550px] bg-teal-450/10 rounded-full blur-[110px] pointer-events-none translate-y-1/3 -translate-x-1/3 animate-glow-teal" />
 
-        {/* Top Logo */}
-        <div className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#EAB308] to-[#CA8A04] flex items-center justify-center shadow-lg shadow-yellow-500/20">
-            <BrainCircuit className="w-5 h-5 text-white" />
+      {/* ───────────────────────────────────────────────────────── */}
+      {/* CENTERED CLINICAL LOGIN CARD */}
+      {/* ───────────────────────────────────────────────────────── */}
+      <div className="w-full max-w-[480px] bg-white/95 backdrop-blur-md border border-slate-100/50 rounded-3xl p-8 md:p-10 shadow-[0_20px_50px_-10px_rgba(14,111,98,0.06)] relative z-10 space-y-6 animate-float-glass">
+        
+        {/* Header Section */}
+        <div className="text-center space-y-3.5">
+          {/* Emblema Clínico */}
+          <div className="inline-flex w-12 h-12 rounded-xl bg-gradient-to-br from-teal-600 to-teal-800 items-center justify-center shadow-lg shadow-teal-700/25 drop-shadow-logo transition-transform hover:scale-105 duration-300">
+            <BearLogo className="w-8.5 h-8.5 text-white" strokeWidth={5} />
           </div>
-          <span className="text-xl font-bold tracking-tight font-[family-name:var(--font-outfit)]">YinbaoYB</span>
-        </div>
-
-        {/* Main Brand Copy */}
-        <div className="space-y-8 relative z-10 max-w-lg mb-12">
-          <h1 className="text-6xl font-extrabold leading-[1.1] tracking-tight font-[family-name:var(--font-outfit)]">
-            Evolución <br />
-            <span className="text-[#EAB308]">Clínica.</span>
-          </h1>
           
-          <div className="space-y-4">
-            <p className="text-lg font-medium text-slate-200">
-              En YinbaoYB centralizamos Historias Clínicas, Agendas y Automatización IA para tu Centro Terapéutico.
-            </p>
-            <p className="text-slate-400 text-sm leading-relaxed border-l-2 border-slate-700 pl-4 py-1 italic">
-              "No entregamos solo un software, brindamos un ecosistema digital inteligente que potencia la evolución de tus pacientes y libera tu tiempo administrativo."
-            </p>
-          </div>
-
-          <p className="text-slate-300 font-medium">
-            Visítanos: <a href="https://yinbaoyb.com" target="_blank" rel="noopener noreferrer" className="text-[#EAB308] hover:text-yellow-400 underline underline-offset-4 decoration-yellow-500/30 transition-colors">yinbaoyb.com</a>
-          </p>
-
-          <div className="flex flex-wrap items-center gap-3 pt-4">
-            <span className="px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800/50 text-xs font-bold text-slate-300 tracking-wider">
-              HISTORIAS CLÍNICAS
-            </span>
-            <span className="px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800/50 text-xs font-bold text-slate-300 tracking-wider">
-              AGENDAMIENTO IA
-            </span>
-            <span className="px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800/50 text-xs font-bold text-slate-300 tracking-wider">
-              MÚLTIPLES SEDES
-            </span>
-          </div>
-        </div>
-
-        {/* Footer info */}
-        <div className="flex items-center gap-2 text-slate-500 text-sm font-medium relative z-10">
-          <MapPin className="w-4 h-4 text-red-500" />
-          Portoviejo, Manabí, Ecuador
-        </div>
-      </div>
-
-      {/* ───────────────────────────────────────────────────────── */}
-      {/* RIGHT PANEL : LOGIN FORM */}
-      {/* ───────────────────────────────────────────────────────── */}
-      <div className="w-full lg:w-1/2 min-h-[100dvh] flex flex-col justify-start lg:justify-center items-center px-6 py-10 md:px-12 bg-white relative">
-        {/* Mobile Header (Only visible on small screens) */}
-        <div className="lg:hidden mb-10 w-full flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#EAB308] to-[#CA8A04] flex items-center justify-center shadow-lg shadow-yellow-500/20">
-            <BrainCircuit className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900 font-[family-name:var(--font-outfit)]">YinbaoYB</span>
-        </div>
-
-        <div className="w-full max-w-md space-y-10">
-          <div>
-            <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 font-[family-name:var(--font-outfit)]">
-              Inicio de sesión
+          <div className="space-y-1.5">
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight font-[family-name:var(--font-outfit)]">
+              Portal Terapéutico
             </h2>
-            <p className="mt-3 text-[15px] text-slate-500 leading-relaxed font-medium">
-              Accede al sistema de gestión interno de YinbaoYB para administrar las operaciones y agendas SaaS.
+            <p className="text-xs font-bold text-teal-800 tracking-wider uppercase">
+              YB Evolución Clínica
+            </p>
+            <p className="text-[13px] text-slate-500 leading-relaxed font-medium pt-1">
+              Accede al portal de tu centro terapéutico para revisar historias clínicas, reportes de evolución e interactuar con la IA de progreso.
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            
-            {/* Status Messages */}
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-sm font-medium text-red-600 flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
-                {error}
-              </div>
-            )}
-            {message && (
-              <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-sm font-medium text-emerald-700 flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0" />
-                {message}
-              </div>
-            )}
+          {/* Pastel Role Pills - Reassuring who this is for */}
+          <div className="flex flex-wrap justify-center items-center gap-1.5 pt-1">
+            <span className="px-2.5 py-1 rounded-full text-[9px] font-bold bg-sky-50 border border-sky-100 text-sky-700 tracking-wider select-none">
+              PADRES / TUTORES
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-[9px] font-bold bg-teal-50/60 border border-teal-100 text-teal-800 tracking-wider select-none">
+              TERAPEUTAS
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-[9px] font-bold bg-slate-50 border border-slate-150 text-slate-600 tracking-wider select-none">
+              ADMINISTRACIÓN
+            </span>
+          </div>
+        </div>
 
-            <div className="space-y-5">
-              <div className="space-y-1.5">
-                <label htmlFor="email" className="block textxs font-bold text-slate-700 uppercase tracking-widest text-[11px]">
-                  Correo Electrónico
-                </label>
+        {/* Form Section */}
+        <form onSubmit={handleLogin} className="space-y-4">
+          {/* Status Messages */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-150 rounded-xl text-sm font-semibold text-red-700 flex items-start gap-3 shadow-sm shadow-red-50/50">
+              <span className="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
+              <span className="flex-1">{error}</span>
+            </div>
+          )}
+          {message && (
+            <div className="p-4 bg-teal-50 border border-teal-150 rounded-xl text-sm font-semibold text-teal-800 flex items-start gap-3 shadow-sm shadow-teal-50/50">
+              <span className="w-2 h-2 rounded-full bg-teal-600 mt-1.5 flex-shrink-0" />
+              <span className="flex-1">{message}</span>
+            </div>
+          )}
+
+          {/* Inputs Encapsulados Clínicos */}
+          <div className="space-y-3.5">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-xs font-bold text-slate-500 uppercase tracking-widest text-[10px]">
+                Correo Electrónico
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-700 transition-colors">
+                  <Mail className="w-4.5 h-4.5 stroke-[1.8]" />
+                </div>
                 <input
                   id="email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-0 py-3 bg-transparent border-0 border-b-2 border-slate-200 text-slate-900 focus:ring-0 focus:border-[#111827] transition-colors font-medium text-[15px] placeholder:text-slate-400 placeholder:font-normal"
-                  placeholder="director@centro.com"
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50/60 hover:bg-slate-50/90 focus:bg-white border border-slate-200 hover:border-slate-300 focus:border-teal-600 rounded-xl text-slate-900 focus:ring-4 focus:ring-teal-100/50 focus:outline-none transition-all duration-300 font-medium text-[15px] placeholder:text-slate-400 placeholder:font-normal"
+                  placeholder="ejemplo@centro.com"
                 />
               </div>
+            </div>
 
-              <div className="space-y-1.5 relative">
-                <label htmlFor="password" className="block text-xs font-bold text-slate-700 uppercase tracking-widest text-[11px]">
-                  Contraseña
-                </label>
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-xs font-bold text-slate-500 uppercase tracking-widest text-[10px]">
+                Contraseña
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-teal-700 transition-colors">
+                  <Lock className="w-4.5 h-4.5 stroke-[1.8]" />
+                </div>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-0 py-3 bg-transparent border-0 border-b-2 border-slate-200 text-slate-900 focus:ring-0 focus:border-[#111827] transition-colors font-medium text-[15px] placeholder:text-slate-400 placeholder:font-normal tracking-[0.2em]"
+                  className="w-full pl-12 pr-12 py-3.5 bg-slate-50/60 hover:bg-slate-50/90 focus:bg-white border border-slate-200 hover:border-slate-300 focus:border-teal-600 rounded-xl text-slate-900 focus:ring-4 focus:ring-teal-100/50 focus:outline-none transition-all duration-300 font-medium text-[15px] placeholder:text-slate-400 placeholder:font-normal"
                   placeholder="••••••••"
                 />
-                {/* Fake Eye Icon matching design */}
-                <div className="absolute right-2 top-8 text-slate-400 cursor-pointer hover:text-slate-600">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </div>
+                {/* Eye Toggle button - REAL STATE REACTIVITY */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 inset-y-0 flex items-center text-slate-400 hover:text-teal-750 cursor-pointer transition-colors focus:outline-none"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 stroke-[1.8]" />
+                  ) : (
+                    <Eye className="w-5 h-5 stroke-[1.8]" />
+                  )}
+                </button>
               </div>
             </div>
+          </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-[#111827] focus:ring-[#111827] cursor-pointer" 
-                />
-                <span className="text-sm font-medium text-slate-500 group-hover:text-slate-700 transition-colors">Recordarme</span>
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full relative overflow-hidden bg-[#111827] text-white py-4 rounded-xl text-sm font-bold hover:bg-black transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-black/10 group mt-4!"
+          {/* Checkbox and Forgot password */}
+          <div className="flex items-center justify-between pt-1">
+            <label className="flex items-center gap-2 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4.5 h-4.5 rounded border-slate-300 text-teal-750 focus:ring-teal-600 cursor-pointer transition-all" 
+              />
+              <span className="text-sm font-semibold text-slate-500 group-hover:text-slate-800 transition-colors select-none">Recordarme</span>
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-sm font-semibold text-slate-500 hover:text-teal-800 transition-colors select-none"
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin w-4 h-4 text-white/70" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Procesando...
-                </span>
-              ) : (
-                <>
-                  <span className="relative z-10">Ingresar</span>
-                  <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
-                </>
-              )}
-            </button>
-          </form>
+              ¿Olvidó contraseña?
+            </Link>
+          </div>
 
-        </div>
+          {/* Premium Clinical Teal Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full relative overflow-hidden bg-gradient-to-r from-teal-700 to-teal-800 hover:from-teal-800 hover:to-teal-900 text-white py-4 rounded-xl text-sm font-bold shadow-lg shadow-teal-700/10 active:scale-[0.98] transition-all duration-200 disabled:opacity-75 disabled:cursor-not-allowed group mt-2 shimmer-active"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin w-4 h-4 text-white/70" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Procesando acceso...
+              </span>
+            ) : (
+              <>
+                <span className="relative z-10 font-[family-name:var(--font-outfit)] tracking-wide">Ingresar al Portal</span>
+                {/* Shimmer sweep layer */}
+                <div className="shimmer-layer absolute inset-0 h-full w-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full pointer-events-none" />
+              </>
+            )}
+          </button>
+        </form>
 
-        {/* Support Footer */}
-        <div className="w-full mt-auto lg:mt-16 pt-12 lg:pt-0 flex justify-center items-center">
-          <div className="flex flex-wrap justify-center items-center gap-2 lg:gap-4 text-xs lg:text-[13px] font-bold text-slate-500">
-            <span className="flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-yellow-500" /> ¿Problemas?</span>
-            <Link href="https://wa.me/593986189965" target="_blank" className="hover:text-black transition-colors">WhatsApp</Link>
-            <span className="text-slate-300">|</span>
-            <Link href="mailto:soporte@yinbaoyb.com" className="hover:text-black transition-colors">Email</Link>
+        {/* Security and Compliance Footer */}
+        <div className="space-y-4 pt-4 border-t border-slate-100 text-center">
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-teal-800 bg-teal-50 border border-teal-100 px-3 py-1.5 rounded-full select-none">
+            <ShieldCheck className="w-3.5 h-3.5 text-teal-700" />
+            <span>Portal Clínico Cifrado y Seguro (HIPAA)</span>
+          </div>
+          
+          <div className="flex justify-center items-center gap-3 text-xs font-bold text-slate-400">
+            <Link href="https://wa.me/593986189965" target="_blank" className="text-slate-500 hover:text-teal-800 transition-colors">WhatsApp de Soporte</Link>
+            <span className="text-slate-200">|</span>
+            <Link href="mailto:soporte@yb.com" className="text-slate-500 hover:text-teal-800 transition-colors">Email</Link>
           </div>
         </div>
-
+      </div>
+      {/* Location info on bottom right */}
+      <div className="absolute bottom-5 right-5 flex items-center gap-2 text-slate-400 text-xs font-semibold select-none">
+        <MapPin className="w-3.5 h-3.5 text-teal-750" />
+        Portoviejo, Manabí, Ecuador
       </div>
     </div>
   );

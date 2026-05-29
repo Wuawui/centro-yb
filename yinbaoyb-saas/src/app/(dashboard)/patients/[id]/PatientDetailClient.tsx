@@ -46,7 +46,7 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"info" | "escalas" | "notas" | "citas" | "padre">("info");
+  const [activeTab, setActiveTab] = useState<"info" | "escalas" | "notas" | "citas" | "padre" | "evaluaciones">("info");
   const [therapists, setTherapists] = useState<Therapist[]>([]);
   const [selectedTherapist, setSelectedTherapist] = useState(patient.therapist_id || "");
   const [selectedSecondaries, setSelectedSecondaries] = useState<string[]>(patient.secondary_therapist_ids || []);
@@ -55,6 +55,55 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [statusConfirm, setStatusConfirm] = useState<string | null>(null);
   const [showTherapistSelect, setShowTherapistSelect] = useState(false);
+
+  const isEvaluation = (content?: string) => {
+    return content?.trim().startsWith('{"type":"evaluacion"') ?? false;
+  };
+
+  const parseEvaluation = (content?: string) => {
+    try {
+      return content ? JSON.parse(content) : null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const downloadFile = (fileJsonStr: string) => {
+    try {
+      const fileObj = JSON.parse(fileJsonStr);
+      const link = document.createElement("a");
+      link.href = fileObj.file_data;
+      link.download = fileObj.file_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      alert("Error al descargar el archivo");
+    }
+  };
+
+  const handleToggleSharePortal = async (itemId: string, currentContent: string) => {
+    try {
+      const evalObj = JSON.parse(currentContent);
+      const newShared = !evalObj.shared;
+      evalObj.shared = newShared;
+      const updatedContent = JSON.stringify(evalObj);
+
+      const { error: err } = await supabase
+        .from("clinical_notes")
+        .update({ content: updatedContent })
+        .eq("id", itemId);
+
+      if (err) {
+        alert("Error al actualizar visibilidad: " + err.message);
+        return;
+      }
+
+      window.location.reload();
+    } catch (e) {
+      alert("Error al procesar el archivo");
+    }
+  };
 
   const [form, setForm] = useState({
     first_name: patient.first_name, last_name: patient.last_name,
@@ -79,7 +128,7 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
     const { data: s } = await supabase.from("scale_results").select("id, scale_type, total_score, risk_alert, completed_at").eq("patient_id", pid).order("completed_at", { ascending: true });
     if (s) setScaleResults(s as ScaleResult[]);
 
-    const { data: n } = await supabase.from("clinical_notes").select("id, format, signed, created_at, subjective, content").eq("patient_id", pid).order("created_at", { ascending: false }).limit(10);
+    const { data: n } = await supabase.from("clinical_notes").select("id, format, signed, created_at, subjective, content").eq("patient_id", pid).order("created_at", { ascending: false }).limit(50);
     if (n) setClinicalNotes(n as ClinicalNote[]);
 
     const { data: a } = await supabase.from("appointments").select("id, type, status, date, start_time, end_time").eq("patient_id", pid).eq("tenant_id", tid || "").order("date", { ascending: false }).limit(10);
@@ -143,7 +192,10 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
   const genderLabel = patient.gender === "M" ? "Masculino" : patient.gender === "F" ? "Femenino" : patient.gender === "O" ? "Otro" : null;
   const initials = `${patient.first_name?.[0] || ""}${patient.last_name?.[0] || ""}`;
   const riskAlerts = scaleResults.filter(r => r.risk_alert).length;
-  const unsignedNotes = clinicalNotes.filter(n => !n.signed).length;
+
+  const clinicalNotesList = clinicalNotes.filter(n => !isEvaluation(n.content));
+  const evaluationsList = clinicalNotes.filter(n => isEvaluation(n.content));
+  const unsignedNotes = clinicalNotesList.filter(n => !n.signed).length;
 
   const Field = ({ label, value }: { label: string; value: string | null | undefined }) => (
     <div><dt className="text-xs font-medium text-gray-500 uppercase">{label}</dt><dd className="mt-1 text-sm text-gray-900">{value || "—"}</dd></div>
@@ -207,7 +259,7 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
                 <span className="text-[10px] font-medium text-blue-600 uppercase tracking-wider">Citas</span>
               </button>
               <button onClick={() => setActiveTab("notas")} className="flex flex-col items-center p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer border border-emerald-100 relative">
-                <span className="text-lg font-bold text-emerald-700">{clinicalNotes.length}</span>
+                <span className="text-lg font-bold text-emerald-700">{clinicalNotesList.length}</span>
                 <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-wider">Notas</span>
                 {unsignedNotes > 0 && <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-amber-500 text-white text-[9px] font-bold flex items-center justify-center">{unsignedNotes}</span>}
               </button>
@@ -259,7 +311,8 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
           {([
             { key: "info" as const, label: "Datos del Paciente", icon: "📋", count: 0, alert: false },
             { key: "escalas" as const, label: "Escalas", icon: "📊", count: scaleResults.length, alert: riskAlerts > 0 },
-            { key: "notas" as const, label: "Notas Clínicas", icon: "📝", count: clinicalNotes.length, alert: unsignedNotes > 0 },
+            { key: "notas" as const, label: "Notas Clínicas", icon: "📝", count: clinicalNotesList.length, alert: unsignedNotes > 0 },
+            { key: "evaluaciones" as const, label: "Evaluaciones", icon: "📁", count: evaluationsList.length, alert: false },
             { key: "citas" as const, label: "Historial de Citas", icon: "📅", count: appointments.length, alert: false },
             { key: "padre" as const, label: "Padre / Acudiente", icon: "👨‍👧", count: 0, alert: false },
           ]).map(tab => (
@@ -500,13 +553,13 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
         {/* NOTAS TAB */}
         {activeTab === "notas" && (
           <div className="space-y-4">
-            {clinicalNotes.length === 0 ? (
+            {clinicalNotesList.length === 0 ? (
               <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
                 <div className="text-4xl mb-3">📝</div>
                 <h3 className="text-base font-semibold text-gray-900 mb-1">Sin notas clínicas</h3>
                 <p className="text-sm text-gray-500">Las notas de sesión aparecerán aquí</p>
               </div>
-            ) : clinicalNotes.map(n => (
+            ) : clinicalNotesList.map(n => (
               <div key={n.id} className="bg-white rounded-xl border border-gray-200 p-5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -518,6 +571,62 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
                 <p className="text-sm text-gray-700 line-clamp-3">{n.subjective || n.content || "Sin contenido"}</p>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* EVALUACIONES TAB */}
+        {activeTab === "evaluaciones" && (
+          <div className="space-y-4">
+            {evaluationsList.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+                <div className="text-4xl mb-3">📁</div>
+                <h3 className="text-base font-semibold text-gray-900 mb-1">Sin evaluaciones subidas</h3>
+                <p className="text-sm text-gray-500">Las evaluaciones del paciente subidas por los terapeutas aparecerán aquí</p>
+              </div>
+            ) : evaluationsList.map(item => {
+              const evalData = parseEvaluation(item.content);
+              if (!evalData) return null;
+              const formattedSize = evalData.file_size ? `${(evalData.file_size / 1024).toFixed(1)} KB` : "N/A";
+              const isPdf = evalData.file_name?.toLowerCase().endsWith(".pdf");
+              const isShared = !!evalData.shared;
+
+              return (
+                <div key={item.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 ${isPdf ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"}`}>
+                      {isPdf ? "PDF" : "DOC"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 text-sm truncate">{evalData.file_name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-gray-400">{fmt(item.created_at)} · {formattedSize}</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                          isShared ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"
+                        }`}>
+                          {isShared ? "👁️ Compartido en Portal" : "🔒 Privado (Solo Centro)"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => item.content && downloadFile(item.content)} className="px-3 py-1.5 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                      Descargar
+                    </button>
+                    
+                    <button 
+                      onClick={() => item.content && handleToggleSharePortal(item.id, item.content)}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                        isShared 
+                          ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100" 
+                          : "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                      }`}
+                    >
+                      {isShared ? "Quitar del Portal 🔒" : "Publicar al Portal 📤"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
