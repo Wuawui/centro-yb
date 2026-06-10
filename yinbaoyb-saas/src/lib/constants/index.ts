@@ -38,6 +38,46 @@ export const APPOINTMENT_TYPE_COLORS: Record<string, string> = {
   supervision: "bg-pink-100 text-pink-700 border-pink-200",
 };
 
+export const APPOINTMENT_COLOR_MAP: Record<string, string> = {
+  indigo: "bg-indigo-100 text-indigo-700 border-indigo-200",
+  purple: "bg-purple-100 text-purple-700 border-purple-200",
+  emerald: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  amber: "bg-amber-100 text-amber-700 border-amber-200",
+  pink: "bg-pink-100 text-pink-700 border-pink-200",
+  rose: "bg-rose-100 text-rose-700 border-rose-200",
+  teal: "bg-teal-100 text-teal-700 border-teal-200",
+  sky: "bg-sky-100 text-sky-700 border-sky-200",
+};
+
+export const APPOINTMENT_COLOR_OPTIONS = [
+  { id: "indigo", name: "Indigo/Azul", classes: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+  { id: "purple", name: "Púrpura", classes: "bg-purple-100 text-purple-700 border-purple-200" },
+  { id: "emerald", name: "Esmeralda/Verde", classes: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  { id: "amber", name: "Ámbar/Amarillo", classes: "bg-amber-100 text-amber-700 border-amber-200" },
+  { id: "pink", name: "Rosado", classes: "bg-pink-100 text-pink-700 border-pink-200" },
+  { id: "rose", name: "Rosa/Rojo", classes: "bg-rose-100 text-rose-700 border-rose-200" },
+  { id: "teal", name: "Azul verde/Teal", classes: "bg-teal-100 text-teal-700 border-teal-200" },
+  { id: "sky", name: "Cielo/Celeste", classes: "bg-sky-100 text-sky-700 border-sky-200" },
+];
+
+export function parseAppointmentNotes(notes: string | null): { color: string | null; text: string } {
+  if (!notes) return { color: null, text: "" };
+  if (notes.startsWith("{") && notes.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(notes);
+      if (typeof parsed === "object" && parsed !== null) {
+        return {
+          color: parsed.color || null,
+          text: parsed.text || "",
+        };
+      }
+    } catch (e) {
+      // Fallback
+    }
+  }
+  return { color: null, text: notes };
+}
+
 export const APPOINTMENT_STATUS_LABELS: Record<string, string> = {
   programada: "Programada",
   confirmada: "Confirmada",

@@ -13,6 +13,8 @@ import {
   APPOINTMENT_STATUS_COLORS,
   DAY_NAMES,
   MONTH_NAMES,
+  APPOINTMENT_COLOR_MAP,
+  parseAppointmentNotes,
 } from "@/lib/constants";
 import { getDateRange, getWeekDates as getWeekDatesUtil, getMonthWeeks as getMonthWeeksUtil } from "@/lib/data/queries";
 
@@ -61,6 +63,7 @@ export default function TherapistAgendaPage() {
   const dayNames = DAY_NAMES;
   const monthNames = MONTH_NAMES;
   const typeColors = APPOINTMENT_TYPE_COLORS;
+  const colorMap = APPOINTMENT_COLOR_MAP;
   const typeLabels = APPOINTMENT_TYPE_LABELS;
   const statusLabels = APPOINTMENT_STATUS_LABELS;
   const statusColors = APPOINTMENT_STATUS_COLORS;
@@ -132,6 +135,8 @@ export default function TherapistAgendaPage() {
             <EmptyState icon="📅" title="Sin citas para este día" />
           ) : byDate[selectedDate].map(apt => {
             const pName = (apt.patients as any) ? `${(apt.patients as any).first_name} ${(apt.patients as any).last_name}` : "Paciente";
+            const { color: customColorId, text: notesText } = parseAppointmentNotes(apt.notes);
+            const colorClasses = (customColorId && colorMap[customColorId]) || typeColors[apt.type] || "bg-gray-100 text-gray-700";
             return (
               <div key={apt.id} className="bg-white rounded-xl border border-gray-200 p-4 cursor-pointer hover:shadow-sm" onClick={() => setSelectedApt(selectedApt === apt.id ? null : apt.id)}>
                 <div className="flex items-center gap-4">
@@ -143,14 +148,14 @@ export default function TherapistAgendaPage() {
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{pName}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${typeColors[apt.type] || "bg-gray-100"}`}>{typeLabels[apt.type] || apt.type}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${colorClasses}`}>{typeLabels[apt.type] || apt.type}</span>
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${statusColors[apt.status] || "bg-gray-100"}`}>{statusLabels[apt.status] || apt.status}</span>
                     </div>
                   </div>
                 </div>
-                {selectedApt === apt.id && apt.notes && (
+                {selectedApt === apt.id && notesText && (
                   <div className="mt-3 pt-3 border-t border-gray-100">
-                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">{apt.notes}</p>
+                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded">{notesText}</p>
                   </div>
                 )}
               </div>
@@ -170,12 +175,16 @@ export default function TherapistAgendaPage() {
                   <p className={`text-lg font-bold ${isT ? "text-teal-600" : "text-gray-900"}`}>{d.getDate()}</p>
                 </div>
                 <div className="p-1.5 space-y-1">
-                  {apts.filter(a => a.status !== "cancelada").slice(0, 3).map(apt => (
-                    <div key={apt.id} className={`px-1.5 py-1 rounded text-[10px] border ${typeColors[apt.type] || "bg-gray-100"}`}>
-                      <p className="font-medium truncate">{apt.start_time?.slice(0, 5)}</p>
-                      <p className="truncate">{(apt.patients as any)?.first_name || "?"}</p>
-                    </div>
-                  ))}
+                  {apts.filter(a => a.status !== "cancelada").slice(0, 3).map(apt => {
+                    const { color: customColorId } = parseAppointmentNotes(apt.notes);
+                    const colorClasses = (customColorId && colorMap[customColorId]) || typeColors[apt.type] || "bg-gray-100 text-gray-700";
+                    return (
+                      <div key={apt.id} className={`px-1.5 py-1 rounded text-[10px] border ${colorClasses}`}>
+                        <p className="font-medium truncate">{apt.start_time?.slice(0, 5)}</p>
+                        <p className="truncate">{(apt.patients as any)?.first_name || "?"}</p>
+                      </div>
+                    );
+                  })}
                   {apts.filter(a => a.status !== "cancelada").length > 3 && <p className="text-[10px] text-gray-400 text-center">+{apts.filter(a => a.status !== "cancelada").length - 3} más</p>}
                 </div>
               </div>
@@ -193,11 +202,17 @@ export default function TherapistAgendaPage() {
             return (
               <div key={date} className={`bg-white p-1.5 min-h-[80px] ${!isCurrentMonth ? "opacity-40" : ""} ${isT ? "ring-2 ring-teal-400 ring-inset" : ""}`} onClick={() => { setSelectedDate(date); setView("day"); }}>
                 <p className={`text-xs font-medium mb-1 ${isT ? "text-teal-600" : "text-gray-700"}`}>{dd.getDate()}</p>
-                {apts.filter(a => a.status !== "cancelada").slice(0, 2).map(apt => (
-                  <div key={apt.id} className="px-1 py-0.5 rounded text-[9px] mb-0.5 bg-teal-100 text-teal-700">
-                    {apt.start_time?.slice(0, 5)} {(apt.patients as any)?.first_name?.charAt(0) || ""}
-                  </div>
-                ))}
+                {apts.filter(a => a.status !== "cancelada").slice(0, 2).map(apt => {
+                  const { color: customColorId } = parseAppointmentNotes(apt.notes);
+                  const colorClasses = (customColorId && colorMap[customColorId]) || typeColors[apt.type] || "bg-gray-100 text-gray-700";
+                  const bgClass = colorClasses.split(" ")[0];
+                  const textClass = colorClasses.split(" ")[1];
+                  return (
+                    <div key={apt.id} className={`px-1 py-0.5 rounded text-[9px] mb-0.5 ${bgClass} ${textClass}`}>
+                      {apt.start_time?.slice(0, 5)} {(apt.patients as any)?.first_name?.charAt(0) || ""}
+                    </div>
+                  );
+                })}
                 {apts.filter(a => a.status !== "cancelada").length > 2 && <p className="text-[9px] text-gray-400">+{apts.filter(a => a.status !== "cancelada").length - 2}</p>}
               </div>
             );
