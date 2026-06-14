@@ -256,101 +256,123 @@ export default function AgendaPage() {
     loadData();
   }
 
-  // Download schedule as PDF
+  // Download schedule as visual planner PDF
   function downloadPDF() {
     const sortedApts = [...appointments]
       .filter(a => a.status !== "cancelada")
       .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
 
+    const dayNamesLong = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
     const dayNamesES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     const monthNamesES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
-    const formatDate = (dateStr: string) => {
+    const formatDateFull = (dateStr: string) => {
       const d = new Date(dateStr + "T12:00:00");
-      return `${dayNamesES[d.getDay()]} ${d.getDate()} de ${monthNamesES[d.getMonth()]} ${d.getFullYear()}`;
+      return `${dayNamesLong[d.getDay()]}, ${d.getDate()} de ${monthNamesES[d.getMonth()]} de ${d.getFullYear()}`;
     };
+    const getDay = (dateStr: string) => new Date(dateStr + "T12:00:00").getDate().toString();
+    const getDayShort = (dateStr: string) => dayNamesES[new Date(dateStr + "T12:00:00").getDay()];
 
     // Group by date
     const grouped: Record<string, typeof sortedApts> = {};
     sortedApts.forEach(a => { if (!grouped[a.date]) grouped[a.date] = []; grouped[a.date].push(a); });
 
-    const statusMap: Record<string, string> = { programada: "Programada", confirmada: "Confirmada", completada: "Completada", cancelada: "Cancelada", no_asistio: "No asistió" };
-    const typeMap: Record<string, string> = { individual: "Individual", grupal: "Grupal", evaluacion: "Evaluación", seguimiento: "Seguimiento", taller: "Taller", online: "Online" };
+    const statusCfg: Record<string, {label:string;bg:string;color:string;dot:string}> = {
+      programada: {label:"Programada",  bg:"#fef3c7",color:"#92400e",dot:"#f59e0b"},
+      confirmada: {label:"Confirmada",  bg:"#d1fae5",color:"#065f46",dot:"#10b981"},
+      completada: {label:"Completada",  bg:"#e0e7ff",color:"#3730a3",dot:"#6366f1"},
+      no_asistio: {label:"No asistió",  bg:"#fee2e2",color:"#991b1b",dot:"#ef4444"},
+    };
+    const typeCfg: Record<string, {label:string;accent:string}> = {
+      individual:  {label:"Individual",  accent:"#6366f1"},
+      grupal:      {label:"Grupal",      accent:"#f59e0b"},
+      evaluacion:  {label:"Evaluación",  accent:"#8b5cf6"},
+      seguimiento: {label:"Seguimiento", accent:"#10b981"},
+      taller:      {label:"Taller",      accent:"#f97316"},
+      online:      {label:"Online",      accent:"#0ea5e9"},
+    };
 
-    let tableRows = "";
-    let rowCount = 0;
-    Object.entries(grouped)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .forEach(([date, apts]) => {
-        apts.forEach((apt, i) => {
+    const dates = Object.keys(grouped).sort();
+    let dayBlocks = "";
+
+    if (dates.length === 0) {
+      dayBlocks = `<div style="text-align:center;padding:60px;color:#94a3b8;font-size:15px">Sin citas para este período</div>`;
+    } else {
+      dates.forEach(date => {
+        const apts = grouped[date];
+        let cards = "";
+        apts.forEach(apt => {
           const pName = (apt.patients as any) ? `${(apt.patients as any).first_name} ${(apt.patients as any).last_name}` : "—";
           const tName = (apt.profiles as any) ? `${(apt.profiles as any).first_name} ${(apt.profiles as any).last_name}` : "—";
-          const bg = rowCount % 2 === 0 ? "#ffffff" : "#f8fafc";
-          tableRows += `
-            <tr style="background:${bg}">
-              ${i === 0 ? `<td rowspan="${apts.length}" style="font-weight:600;color:#1e293b;vertical-align:top;padding-top:14px;white-space:nowrap">${formatDate(date)}</td>` : ""}
-              <td style="font-weight:700;font-size:15px;color:#0f172a">${apt.start_time.slice(0,5)} – ${apt.end_time.slice(0,5)}</td>
-              <td>${pName}</td>
-              <td>${tName}</td>
-              <td><span style="padding:2px 8px;border-radius:999px;background:#e0e7ff;color:#3730a3;font-size:12px">${typeMap[apt.type] || apt.type}</span></td>
-              <td><span style="padding:2px 8px;border-radius:999px;background:#dcfce7;color:#166534;font-size:12px">${statusMap[apt.status] || apt.status}</span></td>
-            </tr>`;
-          rowCount++;
+          const st = statusCfg[apt.status] || {label:apt.status,bg:"#f1f5f9",color:"#475569",dot:"#94a3b8"};
+          const tp = typeCfg[apt.type] || {label:apt.type,accent:"#64748b"};
+          const [sh,sm] = apt.start_time.split(":").map(Number);
+          const [eh,em] = apt.end_time.split(":").map(Number);
+          const durMin = (eh*60+em)-(sh*60+sm);
+          cards += `<div style="display:flex;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:10px;border:1px solid #e2e8f0">
+            <div style="width:88px;min-width:88px;background:${tp.accent};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 8px;gap:3px">
+              <span style="font-size:19px;font-weight:800;color:#fff;line-height:1">${apt.start_time.slice(0,5)}</span>
+              <span style="font-size:11px;color:rgba(255,255,255,.6)">│</span>
+              <span style="font-size:16px;font-weight:700;color:rgba(255,255,255,.9);line-height:1">${apt.end_time.slice(0,5)}</span>
+              <span style="margin-top:6px;font-size:10px;color:rgba(255,255,255,.65);background:rgba(0,0,0,.15);border-radius:99px;padding:2px 7px">${durMin} min</span>
+            </div>
+            <div style="flex:1;background:#fff;padding:14px 18px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+                <span style="font-size:16px;font-weight:700;color:#0f172a;line-height:1.3">${pName}</span>
+                <span style="white-space:nowrap;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:${st.bg};color:${st.color}"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${st.dot};vertical-align:middle;margin-right:4px"></span>${st.label}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:18px">
+                <span style="font-size:13px;color:#64748b">👨‍⚕️ <span style="color:#374151;font-weight:500">${tName}</span></span>
+                <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#6b7280"><span style="display:inline-block;width:8px;height:8px;border-radius:3px;background:${tp.accent}"></span>${tp.label}</span>
+              </div>
+            </div>
+          </div>`;
         });
-      });
 
-    if (!tableRows) {
-      tableRows = `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:24px">Sin citas para mostrar</td></tr>`;
+        dayBlocks += `<div style="margin-bottom:28px;break-inside:avoid">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+            <div style="width:56px;height:56px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;color:#fff">
+              <span style="font-size:10px;font-weight:700;letter-spacing:.07em;opacity:.75;text-transform:uppercase">${getDayShort(date)}</span>
+              <span style="font-size:26px;font-weight:800;line-height:1">${getDay(date)}</span>
+            </div>
+            <div>
+              <div style="font-size:17px;font-weight:700;color:#1e293b">${formatDateFull(date)}</div>
+              <div style="font-size:12px;color:#94a3b8;margin-top:2px">${apts.length} cita${apts.length !== 1 ? "s" : ""} programada${apts.length !== 1 ? "s" : ""}</div>
+            </div>
+          </div>
+          ${cards}
+        </div>`;
+      });
     }
 
     const periodLabel = dateLabel();
     const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Horario — ${periodLabel}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; background: #fff; padding: 32px; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 3px solid #4f46e5; padding-bottom: 16px; }
-    .header h1 { font-size: 24px; font-weight: 800; color: #1e293b; }
-    .header p { font-size: 13px; color: #64748b; margin-top: 4px; }
-    .badge { background: #eef2ff; color: #4f46e5; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th { background: #4f46e5; color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
-    thead th:first-child { border-radius: 8px 0 0 0; }
-    thead th:last-child { border-radius: 0 8px 0 0; }
-    tbody td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-    tbody tr:last-child td { border-bottom: none; }
-    .footer { margin-top: 24px; text-align: right; font-size: 11px; color: #94a3b8; }
-    @media print { body { padding: 16px; } }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <h1>📅 Horario de Citas</h1>
-      <p>${periodLabel}</p>
-    </div>
-    <span class="badge">${sortedApts.length} cita${sortedApts.length !== 1 ? "s" : ""}</span>
+<html lang="es"><head><meta charset="UTF-8"/><title>Agenda — ${periodLabel}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;color:#1e293b;background:#f1f5f9}
+.page{max-width:760px;margin:0 auto;padding:32px 20px}
+.hero{background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);border-radius:18px;padding:28px 32px;margin-bottom:36px;display:flex;justify-content:space-between;align-items:center;color:#fff}
+.hero h1{font-size:28px;font-weight:800;margin-bottom:4px}
+.hero p{font-size:14px;opacity:.7}
+.hero-stat{background:rgba(255,255,255,.2);border-radius:12px;padding:10px 20px;text-align:center}
+.hero-stat .n{font-size:32px;font-weight:800;line-height:1}
+.hero-stat .l{font-size:11px;opacity:.7;margin-top:2px}
+.foot{margin-top:32px;border-top:1px solid #e2e8f0;padding-top:14px;text-align:right;font-size:11px;color:#94a3b8}
+@media print{
+  body{background:#fff}
+  .page{padding:16px}
+  .hero,[style*="background:"]{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style></head>
+<body><div class="page">
+  <div class="hero">
+    <div><h1>📅 Agenda de Citas</h1><p>${periodLabel}</p></div>
+    <div class="hero-stat"><div class="n">${sortedApts.length}</div><div class="l">cita${sortedApts.length!==1?"s":""}</div></div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Horario</th>
-        <th>Paciente</th>
-        <th>Terapeuta</th>
-        <th>Tipo</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>${tableRows}</tbody>
-  </table>
-  <div class="footer">Generado el ${new Date().toLocaleDateString("es-EC", { day: "numeric", month: "long", year: "numeric" })} — CentroYB</div>
-  <script>window.onload = () => { window.print(); }<\/script>
-</body>
-</html>`;
+  ${dayBlocks}
+  <div class="foot">Generado el ${new Date().toLocaleDateString("es-EC",{day:"numeric",month:"long",year:"numeric"})} — CentroYB</div>
+</div><script>window.onload=()=>{window.print()}<\/script></body></html>`;
 
     const win = window.open("", "_blank");
     if (win) { win.document.write(html); win.document.close(); }
