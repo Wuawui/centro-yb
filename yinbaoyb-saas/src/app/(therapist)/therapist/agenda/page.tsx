@@ -170,7 +170,11 @@ export default function TherapistAgendaPage() {
             const isT = isToday(date);
             return (
               <div key={date} className={`rounded-xl border ${isT ? "border-teal-300 bg-teal-50/30" : "border-gray-200 bg-white"} min-h-[120px]`}>
-                <div className={`text-center py-2 border-b ${isT ? "border-teal-200" : "border-gray-100"}`}>
+                <div 
+                  className={`text-center py-2 border-b ${isT ? "border-teal-200 hover:bg-teal-100/30" : "border-gray-100 hover:bg-gray-50"} cursor-pointer transition-colors`}
+                  onClick={() => { setSelectedDate(date); setView("day"); }}
+                  title="Ver todo el día"
+                >
                   <p className="text-[10px] text-gray-500 uppercase">{dayNames[d.getDay()]}</p>
                   <p className={`text-lg font-bold ${isT ? "text-teal-600" : "text-gray-900"}`}>{d.getDate()}</p>
                 </div>
@@ -185,7 +189,15 @@ export default function TherapistAgendaPage() {
                       </div>
                     );
                   })}
-                  {apts.filter(a => a.status !== "cancelada").length > 3 && <p className="text-[10px] text-gray-400 text-center">+{apts.filter(a => a.status !== "cancelada").length - 3} más</p>}
+                  {apts.filter(a => a.status !== "cancelada").length > 3 && (
+                    <button 
+                      onClick={() => { setSelectedDate(date); setView("day"); }}
+                      className="w-full text-center text-[10px] text-teal-600 hover:text-teal-800 hover:underline font-semibold mt-1 py-0.5 transition-colors cursor-pointer"
+                      title="Ver todas las citas de este día"
+                    >
+                      +{apts.filter(a => a.status !== "cancelada").length - 3} más
+                    </button>
+                  )}
                 </div>
               </div>
             );
