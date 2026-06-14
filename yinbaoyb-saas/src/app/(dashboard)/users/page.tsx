@@ -249,15 +249,17 @@ export default function UsersPage() {
       )}
 
       {/* Filters */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex bg-gray-100 rounded-lg p-0.5">
-          {(["all", "terapeuta", "padre", "director", "coordinador", "admin"] as const).map(f => (
-            <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${filter === f ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-              {f === "all" ? `Todos (${users.length})` : roleLabels[f] || f}
-            </button>
-          ))}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="overflow-x-auto scrollbar-none">
+          <div className="flex bg-gray-100 rounded-lg p-0.5 min-w-max">
+            {(["all", "terapeuta", "padre", "director", "coordinador", "admin"] as const).map(f => (
+              <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${filter === f ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                {f === "all" ? `Todos (${users.length})` : roleLabels[f] || f}
+              </button>
+            ))}
+          </div>
         </div>
-        <input type="text" placeholder="Buscar por nombre o email..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1 min-w-[200px] px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <input type="text" placeholder="Buscar por nombre o email..." value={search} onChange={e => setSearch(e.target.value)} className="w-full sm:flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
       </div>
 
       {/* Users list */}
@@ -271,7 +273,8 @@ export default function UsersPage() {
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
@@ -322,6 +325,7 @@ export default function UsersPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 

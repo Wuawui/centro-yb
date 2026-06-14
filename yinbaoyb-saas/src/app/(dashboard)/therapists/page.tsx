@@ -344,15 +344,17 @@ export default function TherapistsPage() {
       )}
 
       {/* Filters */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex bg-gray-100 rounded-lg p-0.5">
-          {(["all", "active", "inactive"] as const).map(f => (
-            <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${filter === f ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-              {f === "all" ? `Todos (${therapists.length})` : f === "active" ? `Activos (${activeCount})` : `Inactivos (${inactiveCount})`}
-            </button>
-          ))}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="overflow-x-auto scrollbar-none">
+          <div className="flex bg-gray-100 rounded-lg p-0.5 min-w-max">
+            {(["all", "active", "inactive"] as const).map(f => (
+              <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${filter === f ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                {f === "all" ? `Todos (${therapists.length})` : f === "active" ? `Activos (${activeCount})` : `Inactivos (${inactiveCount})`}
+              </button>
+            ))}
+          </div>
         </div>
-        <input type="text" placeholder="Buscar por nombre, especialidad..." value={search} onChange={e => setSearch(e.target.value)} className="flex-1 min-w-[200px] px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <input type="text" placeholder="Buscar por nombre, especialidad..." value={search} onChange={e => setSearch(e.target.value)} className="w-full sm:flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
       </div>
 
       {/* Therapist list */}

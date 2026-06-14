@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft } from "lucide-react";
+import AIEvolutionView from "@/features/clinical/components/AIEvolutionView";
+import ClinicalNoteCard from "@/components/clinical/ClinicalNoteCard";
 
 interface Patient { id: string; first_name: string; last_name: string; date_of_birth: string | null; phone: string | null; email: string | null; status: string; reason_for_consultation: string | null; medical_history: string | null; active: boolean; }
 interface Appointment { id: string; date: string; start_time: string; end_time: string; type: string; status: string; notes: string | null; }
@@ -25,7 +27,7 @@ export default function TherapistPatientDetailPage() {
   const [notes, setNotes] = useState<ClinicalNote[]>([]);
   const [scales, setScales] = useState<ScaleResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"appointments" | "notes" | "scales" | "evaluaciones">("notes");
+  const [activeTab, setActiveTab] = useState<"appointments" | "notes" | "scales" | "evaluaciones" | "informes" | "ai_evolution">("notes");
 
   // Form for new note
   const [showNewNote, setShowNewNote] = useState(false);
@@ -37,8 +39,17 @@ export default function TherapistPatientDetailPage() {
   const [evalFile, setEvalFile] = useState<File | null>(null);
   const [evalError, setEvalError] = useState<string | null>(null);
 
+  // Report upload state
+  const [uploadingReport, setUploadingReport] = useState(false);
+  const [reportFile, setReportFile] = useState<File | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
+
   const isEvaluation = (content: string) => {
     return content.trim().startsWith('{"type":"evaluacion"');
+  };
+
+  const isReport = (content: string) => {
+    return content.trim().startsWith('{"type":"informe"');
   };
 
   const parseEvaluation = (content: string) => {
@@ -115,6 +126,75 @@ export default function TherapistPatientDetailPage() {
     } catch (err: any) {
       setEvalError(err.message || "Error al subir.");
       setUploadingEval(false);
+    }
+  };
+
+  const handleUploadReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportFile) return;
+    setUploadingReport(true);
+    setReportError(null);
+
+    // Max 5MB check
+    if (reportFile.size > 5242880) {
+      setReportError("El archivo no debe superar los 5MB.");
+      setUploadingReport(false);
+      return;
+    }
+
+    // Strict extension check
+    const allowedExtensions = [".pdf", ".doc", ".docx"];
+    const fileExt = reportFile.name.substring(reportFile.name.lastIndexOf(".")).toLowerCase();
+    if (!allowedExtensions.includes(fileExt)) {
+      setReportError("Solo se permiten archivos PDF o Word (.doc, .docx).");
+      setUploadingReport(false);
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: prof } = await supabase.from("profiles").select("tenant_id").eq("id", user!.id).single();
+      
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+        const payload = JSON.stringify({
+          type: "informe",
+          file_name: reportFile.name,
+          file_size: reportFile.size,
+          file_type: reportFile.type,
+          file_data: base64Data
+        });
+
+        const { error } = await supabase.from("clinical_notes").insert({
+          tenant_id: prof!.tenant_id,
+          patient_id: params.id as string,
+          therapist_id: user!.id,
+          format: "libre",
+          content: payload,
+          signed: false
+        });
+
+        if (error) {
+          setReportError("Error al guardar en base de datos: " + error.message);
+          setUploadingReport(false);
+          return;
+        }
+
+        setReportFile(null);
+        setUploadingReport(false);
+        // Reload notes
+        const { data } = await supabase.from("clinical_notes").select("id, format, content, signed, created_at").eq("tenant_id", prof!.tenant_id).eq("patient_id", params.id as string).eq("therapist_id", user!.id).order("created_at", { ascending: false }).limit(20);
+        setNotes((data || []) as ClinicalNote[]);
+      };
+      reader.onerror = () => {
+        setReportError("Error al leer el archivo.");
+        setUploadingReport(false);
+      };
+      reader.readAsDataURL(reportFile);
+    } catch (err: any) {
+      setReportError(err.message || "Error al subir.");
+      setUploadingReport(false);
     }
   };
 
@@ -213,8 +293,9 @@ export default function TherapistPatientDetailPage() {
 
   const age = patient.date_of_birth ? Math.floor((Date.now() - new Date(patient.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : null;
 
-  const clinicalNotesList = notes.filter(n => !isEvaluation(n.content));
+  const clinicalNotesList = notes.filter(n => !isEvaluation(n.content) && !isReport(n.content));
   const evaluationsList = notes.filter(n => isEvaluation(n.content));
+  const reportsList = notes.filter(n => isReport(n.content));
 
   return (
     <div className="space-y-6">
@@ -259,6 +340,8 @@ export default function TherapistPatientDetailPage() {
             { key: "notes", label: "Notas Clínicas", count: clinicalNotesList.length },
             { key: "scales", label: "Escalas", count: scales.length },
             { key: "evaluaciones", label: "Subir Evaluaciones", count: evaluationsList.length },
+            { key: "informes", label: "Subir Informes", count: reportsList.length },
+            { key: "ai_evolution", label: "Evolución IA", count: "✨" },
           ].map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key as any)} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.key ? "border-teal-600 text-teal-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
               {tab.label} ({tab.count})
@@ -329,20 +412,14 @@ export default function TherapistPatientDetailPage() {
           {clinicalNotesList.length === 0 ? (
             <div className="text-center py-8 bg-white rounded-xl border border-gray-200"><div className="text-3xl mb-2">📋</div><p className="text-sm text-gray-500">Sin notas clínicas aún</p><p className="text-xs text-gray-400 mt-1">Registra la evolución después de cada sesión</p></div>
           ) : clinicalNotesList.map(note => (
-            <div key={note.id} className="bg-white rounded-xl border border-gray-200 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700">{noteLabels[note.format?.toLowerCase()] || note.format}</span>
-                <div className="flex items-center gap-2">
-                  {note.signed ? (
-                    <span className="text-xs text-green-600 font-medium">✓ Firmada</span>
-                  ) : (
-                    <span className="text-xs text-amber-600">Pendiente</span>
-                  )}
-                  <span className="text-xs text-gray-400">{new Date(note.created_at).toLocaleDateString("es-EC")}</span>
-                </div>
-              </div>
-              <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{note.content}</div>
-            </div>
+            <ClinicalNoteCard
+              key={note.id}
+              id={note.id}
+              format={note.format}
+              content={note.content}
+              signed={note.signed}
+              createdAt={note.created_at}
+            />
           ))}
         </div>
       )}
@@ -483,6 +560,126 @@ export default function TherapistPatientDetailPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Reports tab — SUBIR Y VER INFORMES */}
+      {activeTab === "informes" && (
+        <div className="space-y-6">
+          {/* Formulario de carga de informe */}
+          <div className="bg-white rounded-xl border border-teal-100 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 font-outfit">Subir Nuevo Informe</h3>
+            <form onSubmit={handleUploadReport} className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-teal-500 transition-colors bg-gray-50">
+                <input
+                  type="file"
+                  id="report-file-input"
+                  accept=".pdf,.doc,.docx"
+                  onChange={e => {
+                    if (e.target.files && e.target.files[0]) {
+                      setReportFile(e.target.files[0]);
+                    }
+                  }}
+                  className="hidden"
+                />
+                <label htmlFor="report-file-input" className="cursor-pointer space-y-2 block">
+                  <div className="text-4xl text-gray-400">📄</div>
+                  <p className="text-sm text-gray-700 font-medium">
+                    {reportFile ? reportFile.name : "Seleccionar o arrastrar archivo de informe"}
+                  </p>
+                  <p className="text-xs text-gray-400">Formatos permitidos: PDF y Word (.doc, .docx). Máximo 5MB.</p>
+                </label>
+              </div>
+
+              {reportError && (
+                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-1.5">{reportError}</p>
+              )}
+
+              {reportFile && (
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setReportFile(null)}
+                    className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Descartar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={uploadingReport}
+                    className="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50"
+                  >
+                    {uploadingReport ? "Subiendo..." : "Subir Documento"}
+                  </button>
+                </div>
+              )}
+            </form>
+          </div>
+
+          {/* Listado de informes */}
+          <div className="space-y-3">
+            {reportsList.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                <div className="text-4xl mb-3">📄</div>
+                <h4 className="text-base font-semibold text-gray-900 mb-1">Sin informes subidos</h4>
+                <p className="text-sm text-gray-500">Aquí se listarán los informes clínicos, de progreso u otros.</p>
+              </div>
+            ) : (
+              reportsList.map(item => {
+                const reportData = parseEvaluation(item.content); // parses file JSON
+                if (!reportData) return null;
+                const formattedSize = reportData.file_size
+                  ? `${(reportData.file_size / 1024).toFixed(1)} KB`
+                  : "N/A";
+                const isPdf = reportData.file_name?.toLowerCase().endsWith(".pdf");
+                const isShared = !!reportData.shared;
+
+                return (
+                  <div key={item.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 ${isPdf ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"}`}>
+                        {isPdf ? "PDF" : "DOC"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 text-sm truncate">{reportData.file_name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-gray-400">{new Date(item.created_at).toLocaleDateString("es-EC")} · {formattedSize}</span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                            isShared ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"
+                          }`}>
+                            {isShared ? "👁️ Compartido en Portal" : "🔒 Privado (Solo Centro)"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => downloadFile(item.content)}
+                        className="px-3 py-1.5 text-xs font-semibold text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50 transition-colors"
+                      >
+                        Descargar
+                      </button>
+
+                      <button 
+                        onClick={() => item.content && handleToggleSharePortal(item.id, item.content)}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                          isShared 
+                            ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100" 
+                            : "bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100"
+                        }`}
+                      >
+                        {isShared ? "Quitar del Portal 🔒" : "Publicar al Portal 📤"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "ai_evolution" && (
+        <AIEvolutionView patientId={params.id as string} />
       )}
     </div>
   );

@@ -17,6 +17,7 @@ import {
   UserCircle,
   Archive,
   MessageSquare,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -218,6 +219,7 @@ export const ADMIN_NAV: NavItem[] = [
   // ── ADMINISTRACIÓN
   { name: "Usuarios", href: "/users", icon: UserPlus, section: "Administración", roles: ["super_admin", "director", "coordinador", "admin"] },
   { name: "Reportes", href: "/reports", icon: FileBarChart, section: "Administración", roles: ["super_admin", "director", "coordinador", "admin"] },
+  { name: "Análisis IA", href: "/ai-reports", icon: Sparkles, section: "Administración", roles: ["super_admin", "director", "coordinador", "admin"] },
   { name: "Respaldo", href: "/backups", icon: Archive, section: "Administración", roles: ["super_admin", "director", "admin"] },
   { name: "Configuración", href: "/settings", icon: Settings, section: "Administración", roles: ["super_admin", "director", "admin"] },
 ];

@@ -171,24 +171,26 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Reportes</h1>
           <p className="text-sm text-gray-500 mt-1 capitalize">{data.monthName}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            {(["month", "quarter", "year"] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={`px-3 py-1 text-sm rounded-md font-medium transition-colors ${
-                  period === p ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {p === "month" ? "Mes" : p === "quarter" ? "Trimestre" : "Año"}
-              </button>
-            ))}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="overflow-x-auto scrollbar-none">
+            <div className="flex bg-gray-100 rounded-lg p-1 min-w-max">
+              {(["month", "quarter", "year"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={`px-3 py-1 text-sm rounded-md font-medium transition-colors whitespace-nowrap ${
+                    period === p ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {p === "month" ? "Mes" : p === "quarter" ? "Trimestre" : "Año"}
+                </button>
+              ))}
+            </div>
           </div>
           <button onClick={exportCSV} className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
             <Download className="h-4 w-4" /> CSV

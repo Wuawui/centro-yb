@@ -69,20 +69,22 @@ export default function TherapistPatientsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex-1 min-w-[200px] relative">
+        <div className="flex flex-col gap-3">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por nombre..." className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
           </div>
-          <div className="flex bg-gray-100 rounded-lg p-0.5">
-            {[
-              { key: "all", label: "Todos" },
-              { key: "activo", label: "Activos" },
-              { key: "lista_espera", label: "En espera" },
-              { key: "alta", label: "Alta" },
-            ].map(f => (
-              <button key={f.key} onClick={() => setFilter(f.key)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${filter === f.key ? "bg-white text-teal-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>{f.label}</button>
-            ))}
+          <div className="overflow-x-auto scrollbar-none">
+            <div className="flex bg-gray-100 rounded-lg p-0.5 min-w-max">
+              {[
+                { key: "all", label: "Todos" },
+                { key: "activo", label: "Activos" },
+                { key: "lista_espera", label: "En espera" },
+                { key: "alta", label: "Alta" },
+              ].map(f => (
+                <button key={f.key} onClick={() => setFilter(f.key)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${filter === f.key ? "bg-white text-teal-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>{f.label}</button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

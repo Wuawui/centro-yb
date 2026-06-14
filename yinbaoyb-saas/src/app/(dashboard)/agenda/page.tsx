@@ -416,30 +416,32 @@ export default function AgendaPage() {
 
       {/* Controls */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Navigation */}
           <div className="flex items-center gap-2">
             <button onClick={() => navDate(-1)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <h2 className="text-sm font-semibold text-gray-900 min-w-[180px] text-center">{dateLabel()}</h2>
+            <h2 className="text-sm font-semibold text-gray-900 min-w-[140px] text-center">{dateLabel()}</h2>
             <button onClick={() => navDate(1)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
             <button onClick={goToToday} className="px-3 py-1.5 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100">Hoy</button>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {/* View toggle */}
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
-              {(["day", "week", "month"] as const).map(v => (
-                <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${view === v ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-                  {v === "day" ? "Día" : v === "week" ? "Semana" : "Mes"}
-                </button>
-              ))}
+            <div className="overflow-x-auto scrollbar-none">
+              <div className="flex bg-gray-100 rounded-lg p-0.5 min-w-max">
+                {(["day", "week", "month"] as const).map(v => (
+                  <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${view === v ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                    {v === "day" ? "Día" : v === "week" ? "Semana" : "Mes"}
+                  </button>
+                ))}
+              </div>
             </div>
             {/* Therapist filter */}
-            <select value={filterTherapist} onChange={e => setFilterTherapist(e.target.value)} className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs">
+            <select value={filterTherapist} onChange={e => setFilterTherapist(e.target.value)} className="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 rounded-lg text-xs">
               <option value="all">Todos los terapeutas</option>
               {therapists.map(t => <option key={t.id} value={t.id}>{t.first_name} {t.last_name}</option>)}
             </select>
@@ -462,7 +464,8 @@ export default function AgendaPage() {
         </div>
       ) : view === "week" ? (
         /* WEEK VIEW */
-        <div className="grid grid-cols-7 gap-2">
+        <div className="overflow-x-auto -mx-1">
+          <div className="grid grid-cols-7 gap-2 min-w-[560px]">
           {getWeekDatesLocal().map(date => {
             const d = new Date(date + "T12:00:00");
             const apts = byDate[date] || [];
@@ -501,35 +504,38 @@ export default function AgendaPage() {
               </div>
             );
           })}
+          </div>
         </div>
       ) : (
         /* MONTH VIEW */
-        <div>
-          <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-xl overflow-hidden">
-            {dayNames.map(d => <div key={d} className="bg-gray-50 text-center py-2 text-xs font-medium text-gray-500">{d}</div>)}
-            {getMonthWeeksLocal().flat().map((date, i) => {
-              const d = new Date(date + "T12:00:00");
-              const apts = byDate[date] || [];
-              const isCurrentMonth = d.getMonth() === new Date(selectedDate + "T12:00:00").getMonth();
-              const isT = isToday(date);
-              return (
-                <div key={i} className={`bg-white p-1.5 min-h-[80px] ${!isCurrentMonth ? "opacity-40" : ""} ${isT ? "ring-2 ring-indigo-400 ring-inset" : ""}`} onClick={() => { setSelectedDate(date); setView("day"); }}>
-                  <p className={`text-xs font-medium mb-1 ${isT ? "text-indigo-600" : "text-gray-700"}`}>{d.getDate()}</p>
-                  {apts.filter(a => a.status !== "cancelada").slice(0, 2).map(apt => {
-                    const { color: customColorId } = parseAppointmentNotes(apt.notes);
-                    const colorClasses = (customColorId && colorMap[customColorId]) || typeColors[apt.type] || "bg-gray-100 text-gray-700";
-                    const bgClass = colorClasses.split(" ")[0];
-                    const textClass = colorClasses.split(" ")[1];
-                    return (
-                      <div key={apt.id} className={`px-1 py-0.5 rounded text-[9px] mb-0.5 ${bgClass} ${textClass}`}>
-                        {apt.start_time} {(apt.patients as any)?.first_name?.charAt(0) || ""}
-                      </div>
-                    );
-                  })}
-                  {apts.filter(a => a.status !== "cancelada").length > 2 && <p className="text-[9px] text-gray-400">+{apts.filter(a => a.status !== "cancelada").length - 2}</p>}
-                </div>
-              );
-            })}
+        <div className="overflow-x-auto -mx-1">
+          <div className="min-w-[560px]">
+            <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-xl overflow-hidden">
+              {dayNames.map(d => <div key={d} className="bg-gray-50 text-center py-2 text-xs font-medium text-gray-500">{d}</div>)}
+              {getMonthWeeksLocal().flat().map((date, i) => {
+                const d = new Date(date + "T12:00:00");
+                const apts = byDate[date] || [];
+                const isCurrentMonth = d.getMonth() === new Date(selectedDate + "T12:00:00").getMonth();
+                const isT = isToday(date);
+                return (
+                  <div key={i} className={`bg-white p-1.5 min-h-[80px] ${!isCurrentMonth ? "opacity-40" : ""} ${isT ? "ring-2 ring-indigo-400 ring-inset" : ""}`} onClick={() => { setSelectedDate(date); setView("day"); }}>
+                    <p className={`text-xs font-medium mb-1 ${isT ? "text-indigo-600" : "text-gray-700"}`}>{d.getDate()}</p>
+                    {apts.filter(a => a.status !== "cancelada").slice(0, 2).map(apt => {
+                      const { color: customColorId } = parseAppointmentNotes(apt.notes);
+                      const colorClasses = (customColorId && colorMap[customColorId]) || typeColors[apt.type] || "bg-gray-100 text-gray-700";
+                      const bgClass = colorClasses.split(" ")[0];
+                      const textClass = colorClasses.split(" ")[1];
+                      return (
+                        <div key={apt.id} className={`px-1 py-0.5 rounded text-[9px] mb-0.5 ${bgClass} ${textClass}`}>
+                          {apt.start_time} {(apt.patients as any)?.first_name?.charAt(0) || ""}
+                        </div>
+                      );
+                    })}
+                    {apts.filter(a => a.status !== "cancelada").length > 2 && <p className="text-[9px] text-gray-400">+{apts.filter(a => a.status !== "cancelada").length - 2}</p>}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

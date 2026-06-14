@@ -140,3 +140,12 @@ h1, h2, h3, h4, h5, h6 {
   filter: drop-shadow(0 0 12px rgba(14, 111, 98, 0.25));
 }
 
+/* Hide scrollbar utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+

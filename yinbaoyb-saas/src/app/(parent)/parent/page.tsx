@@ -5,9 +5,18 @@ import Link from "next/link";
 import { useSession } from "@/components/providers/SessionProvider";
 import { useParentData } from "@/hooks/useParentData";
 import { PageLoading } from "@/components/ui/LoadingSpinner";
-import EvolutionChart from "@/features/clinical/components/EvolutionChart";
-import { TutorialModal } from "@/components/ui/TutorialModal";
 import { InteractiveTour, type TourStep } from "@/components/ui/InteractiveTour";
+import { TutorialModal } from "@/components/ui/TutorialModal";
+import dynamic from "next/dynamic";
+
+const EvolutionChart = dynamic(() => import("@/features/clinical/components/EvolutionChart"), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-center h-[300px]">
+      <div className="animate-spin h-6 w-6 border-4 border-emerald-600 border-t-transparent rounded-full" />
+    </div>
+  )
+});
 
 const MOTIVATIONAL_QUOTES = [
   "Cada pequeño paso es un avance gigante en su desarrollo.",

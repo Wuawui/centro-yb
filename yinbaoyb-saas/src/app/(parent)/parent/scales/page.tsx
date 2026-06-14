@@ -49,7 +49,7 @@ export default function ParentScalesPage() {
 
           if (notesData) {
             const evals = notesData
-              .filter((n: any) => n.content?.trim().startsWith('{"type":"evaluacion"'))
+              .filter((n: any) => n.content?.trim().startsWith('{"type":"evaluacion"') || n.content?.trim().startsWith('{"type":"informe"'))
               .map((n: any) => {
                 try {
                   const parsed = JSON.parse(n.content);

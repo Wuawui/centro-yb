@@ -7,8 +7,8 @@
 // ============================================================
 import { NextResponse } from "next/server";
 
-const GLAMA_URL = "https://gateway.glama.ai/v1/chat/completions";
-const GLAMA_MODEL = "google-vertex/gemini-2.5-flash";
+const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434/v1/chat/completions";
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "gemma4:31b-cloud";
 
 const SYSTEM_PROMPT = `Eres un psicólogo clínico experto en terapia infantil y del desarrollo. Tu rol es analizar las notas clínicas registradas por los terapeutas y generar un resumen comprensible para los padres o acudientes del paciente.
 
@@ -275,16 +275,15 @@ ${notesContext}
 
 Genera un resumen empático, claro y organizado para los padres. Recuerda: no diagnostiques, solo consolida avances y observaciones.`;
 
-  // 8. Llamar a Glama AI Gateway
+  // 8. Llamar a Ollama
   try {
-    const aiResponse = await fetch(GLAMA_URL, {
+    const aiResponse = await fetch(OLLAMA_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${ollamaKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: GLAMA_MODEL,
+        model: OLLAMA_MODEL,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userMessage },
@@ -294,7 +293,7 @@ Genera un resumen empático, claro y organizado para los padres. Recuerda: no di
 
     if (!aiResponse.ok) {
       const errText = await aiResponse.text();
-      console.warn("Glama API Gateway returned non-200, activating premium local fallback...", aiResponse.status, errText);
+      console.warn("Ollama API returned non-200, activating premium local fallback...", aiResponse.status, errText);
       // ACTIVAR FALLBACK LOCAL:
       const fallbackSummary = generateFallbackSummary(patients, notes);
       return NextResponse.json({

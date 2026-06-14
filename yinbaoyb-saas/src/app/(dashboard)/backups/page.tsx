@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/Toast";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 
 interface BackupFile {
   name: string;
@@ -68,6 +66,11 @@ export default function BackupsPage() {
       
       const text = await data.text();
       const payload = JSON.parse(text);
+      
+      // Cargar jsPDF e interfaces de autoTable bajo demanda para aligerar la carga inicial
+      const jsPDFModule = await import("jspdf");
+      const jsPDF = jsPDFModule.default;
+      await import("jspdf-autotable");
       
       // 2. Generar PDF
       const doc = new jsPDF();

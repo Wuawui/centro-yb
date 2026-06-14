@@ -56,22 +56,35 @@ export default function TherapistDetailPage({ params }: { params: Promise<{ id: 
   const [approachInput, setApproachInput] = useState("");
   const [certInput, setCertInput] = useState("");
 
+  // Handover state
+  const [showHandoverModal, setShowHandoverModal] = useState(false);
+  const [activeTherapists, setActiveTherapists] = useState<{ id: string; name: string }[]>([]);
+  const [selectedSuccessor, setSelectedSuccessor] = useState("");
+  const [deactivateOld, setDeactivateOld] = useState(true);
+  const [confirmText, setConfirmText] = useState("");
+  const [handoverLoading, setHandoverLoading] = useState(false);
+  const [futureApptsCount, setFutureApptsCount] = useState(0);
+
   const supabase = createClient();
   const { tenantId } = useSession();
   const toast = useToast();
   const router = useRouter();
 
-  useEffect(() => { loadData(); }, [id]);
+  useEffect(() => { loadData(); }, [id, tenantId]);
 
   async function loadData() {
     setLoading(true);
     
+    const todayStr = new Date().toISOString().split("T")[0];
+    
     // Cargar TODO en paralelo
-    const [therapistRes, profileRes, patientsRes, availabilityRes] = await Promise.all([
+    const [therapistRes, profileRes, patientsRes, availabilityRes, apptsCountRes, activeTherapistsRes] = await Promise.all([
       supabase.from("therapists").select("id, specialty, license_number, certifications, therapeutic_approach, max_patients, active").eq("id", id).single(),
       supabase.rpc("get_profile_by_id", { profile_id: id }),
       supabase.from("patients").select("id, first_name, last_name, status, active").eq("therapist_id", id).order("status"),
       supabase.from("therapist_availability").select("id, day_of_week, start_time, end_time").eq("therapist_id", id).order("day_of_week"),
+      supabase.from("appointments").select("*", { count: "exact", head: true }).eq("therapist_id", id).gte("date", todayStr).in("status", ["programada", "confirmada", "reprogramada"]),
+      supabase.from("profiles").select("id, first_name, last_name").eq("tenant_id", tenantId || "00000000-0000-0000-0000-000000000001").in("role", ["terapeuta", "coordinador"]).eq("active", true).neq("id", id)
     ]);
 
     if (!therapistRes.data) {
@@ -99,6 +112,15 @@ export default function TherapistDetailPage({ params }: { params: Promise<{ id: 
 
     if (patientsRes.data) setPatients(patientsRes.data as PatientData[]);
     if (availabilityRes.data) setAvailability(availabilityRes.data as AvailabilitySlot[]);
+    if (apptsCountRes.count !== undefined) setFutureApptsCount(apptsCountRes.count || 0);
+    if (activeTherapistsRes.data) {
+      setActiveTherapists(
+        activeTherapistsRes.data.map((p: any) => ({
+          id: p.id,
+          name: `${p.first_name} ${p.last_name}`.trim(),
+        }))
+      );
+    }
 
     setLoading(false);
   }
@@ -147,6 +169,107 @@ export default function TherapistDetailPage({ params }: { params: Promise<{ id: 
     await supabase.from("therapists").update({ active: newActive }).eq("id", id);
     await supabase.from("profiles").update({ active: newActive }).eq("id", id);
     loadData();
+  }
+
+  async function handleHandover() {
+    if (confirmText !== "TRANSFERIR") {
+      toast.addToast("Por favor escribe TRANSFERIR para confirmar", "error");
+      return;
+    }
+    if (!selectedSuccessor) {
+      toast.addToast("Selecciona el terapeuta de destino", "error");
+      return;
+    }
+
+    setHandoverLoading(true);
+    try {
+      const todayStr = new Date().toISOString().split("T")[0];
+
+      // 1. Reasignar pacientes principales
+      const { error: patientErr } = await supabase
+        .from("patients")
+        .update({ therapist_id: selectedSuccessor })
+        .eq("therapist_id", id);
+      
+      if (patientErr) throw new Error("Error al transferir pacientes principales: " + patientErr.message);
+
+      // 2. Remover de terapeutas secundarios
+      const { data: secPatients, error: secFetchErr } = await supabase
+        .from("patients")
+        .select("id, secondary_therapist_ids")
+        .contains("secondary_therapist_ids", [id]);
+
+      if (secFetchErr) throw new Error("Error al buscar terapeutas secundarios: " + secFetchErr.message);
+
+      if (secPatients && secPatients.length > 0) {
+        for (const p of secPatients) {
+          const updated = (p.secondary_therapist_ids || []).filter((x: string) => x !== id);
+          const { error: secUpdateErr } = await supabase
+            .from("patients")
+            .update({ secondary_therapist_ids: updated })
+            .eq("id", p.id);
+          if (secUpdateErr) throw new Error(`Error al actualizar terapeuta secundario para paciente ${p.id}: ${secUpdateErr.message}`);
+        }
+      }
+
+      // 3. Reasignar citas futuras (de hoy en adelante) en estado programada, confirmada, reprogramada
+      const { data: apptsToUpdate, error: apptsFetchErr } = await supabase
+        .from("appointments")
+        .select("id")
+        .eq("therapist_id", id)
+        .gte("date", todayStr)
+        .in("status", ["programada", "confirmada", "reprogramada"]);
+
+      if (apptsFetchErr) throw new Error("Error al buscar citas futuras: " + apptsFetchErr.message);
+
+      if (apptsToUpdate && apptsToUpdate.length > 0) {
+        const { error: apptsUpdateErr } = await supabase
+          .from("appointments")
+          .update({ therapist_id: selectedSuccessor })
+          .in("id", apptsToUpdate.map((a: { id: string }) => a.id));
+        if (apptsUpdateErr) throw new Error("Error al transferir citas: " + apptsUpdateErr.message);
+      }
+
+      // 4. Desactivar terapeuta anterior (si aplica)
+      if (deactivateOld) {
+        const { error: therapistsErr } = await supabase
+          .from("therapists")
+          .update({ active: false })
+          .eq("id", id);
+
+        if (therapistsErr) throw new Error("Error al desactivar en tabla therapists: " + therapistsErr.message);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const res = await fetch("/api/admin/update-user", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${session.access_token}`
+            },
+            body: JSON.stringify({
+              id: id,
+              active: false
+            })
+          });
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error("Error al desactivar cuenta de usuario: " + (errData.error || "Error desconocido"));
+          }
+        }
+      }
+
+      toast.addToast("Traspaso de personal completado con éxito", "success");
+      setShowHandoverModal(false);
+      setConfirmText("");
+      setSelectedSuccessor("");
+      loadData();
+    } catch (err: any) {
+      console.error(err);
+      toast.addToast(err.message || "Ocurrió un error durante la transferencia", "error");
+    } finally {
+      setHandoverLoading(false);
+    }
   }
 
   const handleAddApproach = () => {
@@ -245,7 +368,7 @@ export default function TherapistDetailPage({ params }: { params: Promise<{ id: 
 
       <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* ── ACCIONES RÁPIDAS ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <button onClick={() => { setActiveTab("info"); setEditing(true); }} className="flex items-center gap-3 px-4 py-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 rounded-2xl transition-colors text-left">
             <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0"><svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></div>
             <div><p className="text-sm font-semibold text-indigo-900">Editar Perfil</p><p className="text-[10px] text-indigo-600/70">Información profesional</p></div>
@@ -257,6 +380,10 @@ export default function TherapistDetailPage({ params }: { params: Promise<{ id: 
           <button onClick={handleToggleActive} className={`flex items-center gap-3 px-4 py-3 border rounded-2xl transition-colors text-left ${therapist.active ? "bg-orange-50 hover:bg-orange-100 border-orange-100" : "bg-green-50 hover:bg-green-100 border-green-100"}`}>
             <div className={`h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0 ${therapist.active ? "bg-orange-500" : "bg-green-600"}`}><svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={therapist.active ? "M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" : "M5 13l4 4L19 7"} /></svg></div>
             <div><p className={`text-sm font-semibold ${therapist.active ? "text-orange-900" : "text-green-900"}`}>{therapist.active ? "Desactivar" : "Activar"}</p><p className={`text-[10px] ${therapist.active ? "text-orange-600/70" : "text-green-600/70"}`}>{therapist.active ? "Inhabilitar terapeuta" : "Habilitar terapeuta"}</p></div>
+          </button>
+          <button onClick={() => setShowHandoverModal(true)} className="flex items-center gap-3 px-4 py-3 bg-purple-50 hover:bg-purple-100 border border-purple-100 rounded-2xl transition-colors text-left">
+            <div className="h-9 w-9 rounded-xl bg-purple-600 flex items-center justify-center flex-shrink-0"><svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg></div>
+            <div><p className="text-sm font-semibold text-purple-900">Cambio Personal</p><p className="text-[10px] text-purple-600/70">Reasignar pacientes y citas</p></div>
           </button>
         </div>
 
@@ -410,6 +537,105 @@ export default function TherapistDetailPage({ params }: { params: Promise<{ id: 
           </div>
         )}
       </div>
+
+      {/* ── MODAL CAMBIO DE PERSONAL ── */}
+      {showHandoverModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span>🔄</span> Cambio de Personal
+              </h3>
+              <button 
+                onClick={() => { setShowHandoverModal(false); setConfirmText(""); setSelectedSuccessor(""); }} 
+                className="text-gray-400 hover:text-gray-600 bg-white hover:bg-gray-100 rounded-full p-1.5 transition-colors border"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-5">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 space-y-2">
+                <p className="font-semibold">⚠️ Información importante:</p>
+                <p>Estás iniciando el proceso de entrega y traslado de pacientes asignados a <strong>{name}</strong>.</p>
+                <ul className="list-disc list-inside space-y-1 mt-1 font-medium">
+                  <li>Se reasignarán <strong>{patients.length}</strong> pacientes principales.</li>
+                  <li>Se transferirán <strong>{futureApptsCount}</strong> citas futuras (de hoy en adelante).</li>
+                  <li>Se le removerá de cualquier asignación como terapeuta secundario.</li>
+                  <li>El historial clínico (notas y evaluaciones) permanecerá intacto firmado por su autor original, pero el nuevo terapeuta podrá leerlo sin problemas al ser parte del mismo centro.</li>
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Seleccionar Terapeuta Receptor (Destino) *
+                  </label>
+                  <select 
+                    value={selectedSuccessor} 
+                    onChange={e => setSelectedSuccessor(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    required
+                  >
+                    <option value="">Seleccionar terapeuta...</option>
+                    {activeTherapists.map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                  {activeTherapists.length === 0 && (
+                    <p className="text-xs text-red-500 mt-1">No hay otros terapeutas activos registrados en este centro.</p>
+                  )}
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <input 
+                    type="checkbox" 
+                    id="deactivateOld"
+                    checked={deactivateOld} 
+                    onChange={e => setDeactivateOld(e.target.checked)}
+                    className="h-4.5 w-4.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 mt-0.5"
+                  />
+                  <label htmlFor="deactivateOld" className="text-sm font-medium text-gray-700">
+                    Desactivar la cuenta de <strong>{name}</strong> al finalizar la transferencia (impedirá que vuelva a iniciar sesión).
+                  </label>
+                </div>
+
+                <div className="pt-2 border-t border-gray-100">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Para confirmar, escribe <span className="font-mono bg-gray-100 px-1 py-0.5 rounded text-red-600 font-bold">TRANSFERIR</span> *
+                  </label>
+                  <input 
+                    type="text" 
+                    value={confirmText}
+                    onChange={e => setConfirmText(e.target.value)}
+                    placeholder="Escribe TRANSFERIR"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none uppercase font-semibold"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+              <button 
+                type="button" 
+                onClick={() => { setShowHandoverModal(false); setConfirmText(""); setSelectedSuccessor(""); }} 
+                className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                disabled={handoverLoading}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                onClick={handleHandover}
+                className="px-5 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 disabled:opacity-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none tracking-wide"
+                disabled={handoverLoading || confirmText !== "TRANSFERIR" || !selectedSuccessor}
+              >
+                {handoverLoading ? "Transfiriendo..." : "Confirmar Transferencia"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import ParentLinking from "@/components/clinical/ParentLinking";
+import AIEvolutionView from "@/features/clinical/components/AIEvolutionView";
+import ClinicalNoteCard from "@/components/clinical/ClinicalNoteCard";
 
 interface TherapistProfile { id: string; first_name: string; last_name: string }
 interface Therapist { id: string; profiles: TherapistProfile | null }
@@ -46,7 +48,7 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState<"info" | "escalas" | "notas" | "citas" | "padre" | "evaluaciones">("info");
+  const [activeTab, setActiveTab] = useState<"info" | "escalas" | "notas" | "citas" | "padre" | "evaluaciones" | "informes" | "ai_evolution">("info");
   const [therapists, setTherapists] = useState<Therapist[]>([]);
   const [selectedTherapist, setSelectedTherapist] = useState(patient.therapist_id || "");
   const [selectedSecondaries, setSelectedSecondaries] = useState<string[]>(patient.secondary_therapist_ids || []);
@@ -58,6 +60,10 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
 
   const isEvaluation = (content?: string) => {
     return content?.trim().startsWith('{"type":"evaluacion"') ?? false;
+  };
+
+  const isReport = (content?: string) => {
+    return content?.trim().startsWith('{"type":"informe"') ?? false;
   };
 
   const parseEvaluation = (content?: string) => {
@@ -193,8 +199,9 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
   const initials = `${patient.first_name?.[0] || ""}${patient.last_name?.[0] || ""}`;
   const riskAlerts = scaleResults.filter(r => r.risk_alert).length;
 
-  const clinicalNotesList = clinicalNotes.filter(n => !isEvaluation(n.content));
+  const clinicalNotesList = clinicalNotes.filter(n => !isEvaluation(n.content) && !isReport(n.content));
   const evaluationsList = clinicalNotes.filter(n => isEvaluation(n.content));
+  const reportsList = clinicalNotes.filter(n => isReport(n.content));
   const unsignedNotes = clinicalNotesList.filter(n => !n.signed).length;
 
   const Field = ({ label, value }: { label: string; value: string | null | undefined }) => (
@@ -313,6 +320,8 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
             { key: "escalas" as const, label: "Escalas", icon: "📊", count: scaleResults.length, alert: riskAlerts > 0 },
             { key: "notas" as const, label: "Notas Clínicas", icon: "📝", count: clinicalNotesList.length, alert: unsignedNotes > 0 },
             { key: "evaluaciones" as const, label: "Evaluaciones", icon: "📁", count: evaluationsList.length, alert: false },
+            { key: "informes" as const, label: "Informes", icon: "📄", count: reportsList.length, alert: false },
+            { key: "ai_evolution" as const, label: "Evolución IA", icon: "✨", count: 0, alert: false },
             { key: "citas" as const, label: "Historial de Citas", icon: "📅", count: appointments.length, alert: false },
             { key: "padre" as const, label: "Padre / Acudiente", icon: "👨‍👧", count: 0, alert: false },
           ]).map(tab => (
@@ -560,16 +569,14 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
                 <p className="text-sm text-gray-500">Las notas de sesión aparecerán aquí</p>
               </div>
             ) : clinicalNotesList.map(n => (
-              <div key={n.id} className="bg-white rounded-xl border border-gray-200 p-5">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">{noteLabels[n.format] || n.format}</span>
-                    {n.signed ? <span className="text-xs text-green-600">✓ Firmada</span> : <span className="text-xs text-yellow-600">Sin firma</span>}
-                  </div>
-                  <span className="text-xs text-gray-500">{fmt(n.created_at)}</span>
-                </div>
-                <p className="text-sm text-gray-700 line-clamp-3">{n.subjective || n.content || "Sin contenido"}</p>
-              </div>
+              <ClinicalNoteCard
+                key={n.id}
+                id={n.id}
+                format={n.format}
+                content={n.content || n.subjective || "Sin contenido"}
+                signed={n.signed}
+                createdAt={n.created_at}
+              />
             ))}
           </div>
         )}
@@ -598,6 +605,62 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
                     </div>
                     <div className="min-w-0">
                       <p className="font-medium text-gray-900 text-sm truncate">{evalData.file_name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-gray-400">{fmt(item.created_at)} · {formattedSize}</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
+                          isShared ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"
+                        }`}>
+                          {isShared ? "👁️ Compartido en Portal" : "🔒 Privado (Solo Centro)"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => item.content && downloadFile(item.content)} className="px-3 py-1.5 text-xs font-semibold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors">
+                      Descargar
+                    </button>
+                    
+                    <button 
+                      onClick={() => item.content && handleToggleSharePortal(item.id, item.content)}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                        isShared 
+                          ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100" 
+                          : "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                      }`}
+                    >
+                      {isShared ? "Quitar del Portal 🔒" : "Publicar al Portal 📤"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* INFORMES TAB */}
+        {activeTab === "informes" && (
+          <div className="space-y-4">
+            {reportsList.length === 0 ? (
+              <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+                <div className="text-4xl mb-3">📄</div>
+                <h3 className="text-base font-semibold text-gray-900 mb-1">Sin informes subidos</h3>
+                <p className="text-sm text-gray-500">Los informes del paciente subidos por los terapeutas aparecerán aquí</p>
+              </div>
+            ) : reportsList.map(item => {
+              const reportData = parseEvaluation(item.content);
+              if (!reportData) return null;
+              const formattedSize = reportData.file_size ? `${(reportData.file_size / 1024).toFixed(1)} KB` : "N/A";
+              const isPdf = reportData.file_name?.toLowerCase().endsWith(".pdf");
+              const isShared = !!reportData.shared;
+
+              return (
+                <div key={item.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 ${isPdf ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"}`}>
+                      {isPdf ? "PDF" : "DOC"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 text-sm truncate">{reportData.file_name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-xs text-gray-400">{fmt(item.created_at)} · {formattedSize}</span>
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
@@ -660,6 +723,11 @@ export default function PatientDetailClient({ patient }: { patient: Patient }) {
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <ParentLinking patientId={patient.id} />
           </div>
+        )}
+
+        {/* EVOLUCIÓN IA TAB */}
+        {activeTab === "ai_evolution" && (
+          <AIEvolutionView patientId={patient.id} />
         )}
       </div>
     </div>

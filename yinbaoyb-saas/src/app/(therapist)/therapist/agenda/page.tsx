@@ -105,23 +105,25 @@ export default function TherapistAgendaPage() {
 
       {/* Controls */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <button onClick={() => navDate(-1)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <h2 className="text-sm font-semibold text-gray-900 min-w-[180px] text-center">{dateLabel()}</h2>
+            <h2 className="text-sm font-semibold text-gray-900 min-w-[140px] text-center">{dateLabel()}</h2>
             <button onClick={() => navDate(1)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-600">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
             <button onClick={() => setSelectedDate(new Date().toISOString().split("T")[0])} className="px-3 py-1.5 text-xs font-medium bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100">Hoy</button>
           </div>
-          <div className="flex bg-gray-100 rounded-lg p-0.5">
-            {(["day", "week", "month"] as const).map(v => (
-              <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${view === v ? "bg-white text-teal-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-                {v === "day" ? "Día" : v === "week" ? "Semana" : "Mes"}
-              </button>
-            ))}
+          <div className="overflow-x-auto scrollbar-none">
+            <div className="flex bg-gray-100 rounded-lg p-0.5 min-w-max">
+              {(["day", "week", "month"] as const).map(v => (
+                <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap ${view === v ? "bg-white text-teal-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                  {v === "day" ? "Día" : v === "week" ? "Semana" : "Mes"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -163,7 +165,8 @@ export default function TherapistAgendaPage() {
           })}
         </div>
       ) : view === "week" ? (
-        <div className="grid grid-cols-7 gap-2">
+        <div className="overflow-x-auto -mx-1">
+          <div className="grid grid-cols-7 gap-2 min-w-[560px]">
           {getWeekDatesUtil(selectedDate).map(date => {
             const d = new Date(date + "T12:00:00");
             const apts = byDate[date] || [];
@@ -202,9 +205,11 @@ export default function TherapistAgendaPage() {
               </div>
             );
           })}
+          </div>
         </div>
       ) : (
-        <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto -mx-1">
+          <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-xl overflow-hidden min-w-[560px]">
           {dayNames.map(d => <div key={d} className="bg-gray-50 text-center py-2 text-xs font-medium text-gray-500">{d}</div>)}
           {getMonthWeeksUtil(selectedDate).flat().map((date) => {
             const dd = new Date(date + "T12:00:00");
@@ -229,6 +234,7 @@ export default function TherapistAgendaPage() {
               </div>
             );
           })}
+          </div>
         </div>
       )}
 

@@ -94,6 +94,20 @@ export async function DELETE(request: Request) {
       body: JSON.stringify({ therapist_id: null })
     });
 
+    // Actualizar log de auditoría (desvincular del usuario para evitar violar FK)
+    await fetch(`${supabaseUrl}/rest/v1/audit_log?user_id=eq.${userId}`, {
+      method: "PATCH",
+      headers: fetchHeaders,
+      body: JSON.stringify({ user_id: null })
+    });
+
+    // Actualizar resultados de escalas (desvincular terapeuta)
+    await fetch(`${supabaseUrl}/rest/v1/scale_results?therapist_id=eq.${userId}`, {
+      method: "PATCH",
+      headers: fetchHeaders,
+      body: JSON.stringify({ therapist_id: null })
+    });
+
     // Actualizar notas
     await fetch(`${supabaseUrl}/rest/v1/clinical_notes?therapist_id=eq.${userId}`, {
       method: "PATCH",

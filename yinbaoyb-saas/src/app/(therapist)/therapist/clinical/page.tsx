@@ -8,6 +8,7 @@ import { PageLoading } from "@/components/ui/LoadingSpinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { NOTE_FORMAT_LABELS, NOTE_FORMAT_COLORS } from "@/lib/constants";
 import { createClinicalNote, signClinicalNote } from "@/lib/data/queries";
+import ClinicalNoteCard from "@/components/clinical/ClinicalNoteCard";
 
 interface ClinicalNote {
   id: string;
@@ -30,6 +31,10 @@ export default function TherapistClinicalPage() {
   const [saving, setSaving] = useState(false);
   const [myPatients, setMyPatients] = useState<{ id: string; first_name: string; last_name: string }[]>([]);
   const [form, setForm] = useState({ patient_id: "", tareas: "", observaciones: "", resultados: "", recomendaciones: "" });
+
+  // Search states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchDate, setSearchDate] = useState("");
 
   const loadNotes = useCallback(async () => {
     if (!tenantId || !user) {
@@ -112,6 +117,25 @@ export default function TherapistClinicalPage() {
     : filter === "all"
     ? notes
     : notes.filter(n => n.format?.toLowerCase() === filter);
+
+  const searchedNotes = filtered.filter(n => {
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const pName = n.patients
+        ? `${n.patients.first_name} ${n.patients.last_name}`.toLowerCase()
+        : "";
+      if (!pName.includes(q)) return false;
+    }
+    if (searchDate) {
+      const d = new Date(n.created_at);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const noteDateStr = `${year}-${month}-${day}`;
+      if (noteDateStr !== searchDate) return false;
+    }
+    return true;
+  });
 
   const formatLabel = (fmt: string) => NOTE_FORMAT_LABELS[fmt] || NOTE_FORMAT_LABELS[fmt?.toLowerCase()] || fmt;
   const formatColor = (fmt: string) => NOTE_FORMAT_COLORS[fmt] || NOTE_FORMAT_COLORS[fmt?.toLowerCase()] || "bg-gray-50 text-gray-700";
@@ -221,64 +245,83 @@ export default function TherapistClinicalPage() {
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="flex bg-gray-100 rounded-lg p-0.5 max-w-sm">
-        {[
-          { key: "all", label: "Todas" },
-          { key: "unsigned", label: "Sin firmar" },
-        ].map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-              filter === f.key ? "bg-white text-teal-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      {/* Filtros y Búsqueda */}
+      <div className="flex flex-col md:flex-row md:items-center gap-4 bg-white p-4 rounded-xl border border-gray-200">
+        {/* Pestañas */}
+        <div className="flex bg-gray-100 rounded-lg p-0.5 w-full md:max-w-xs">
+          {[
+            { key: "all", label: "Todas" },
+            { key: "unsigned", label: "Sin firmar" },
+          ].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                filter === f.key ? "bg-white text-teal-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Búsqueda por Nombre */}
+        <div className="flex-1 min-w-[200px]">
+          <input
+            type="text"
+            placeholder="Buscar por paciente..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
+          />
+        </div>
+
+        {/* Filtrar por Fecha */}
+        <div className="w-full md:w-auto flex items-center gap-2">
+          <input
+            type="date"
+            value={searchDate}
+            onChange={e => setSearchDate(e.target.value)}
+            className="w-full md:w-auto px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
+          />
+          {searchDate && (
+            <button
+              onClick={() => setSearchDate("")}
+              className="text-xs text-gray-500 hover:text-gray-700 bg-gray-100 px-2.5 py-1.5 rounded-lg border border-gray-200 transition-colors"
+              title="Limpiar fecha"
+            >
+              Limpiar
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Lista de notas */}
       {loading ? (
         <PageLoading text="Cargando notas..." color="text-teal-600" />
-      ) : filtered.length === 0 ? (
-        <EmptyState icon="📋" title="Sin notas clínicas" description="Registra la evolución después de cada sesión" />
+      ) : searchedNotes.length === 0 ? (
+        <EmptyState 
+          icon="📋" 
+          title="Sin notas clínicas" 
+          description={searchQuery || searchDate ? "No se encontraron notas que coincidan con los criterios de búsqueda." : "Registra la evolución después de cada sesión"} 
+        />
       ) : (
-        <div className="space-y-3">
-          {filtered.map((note) => {
+        <div className="space-y-4">
+          {searchedNotes.map((note) => {
             const pName = note.patients
-              ? `${(note.patients as any).first_name} ${(note.patients as any).last_name}`
+              ? `${note.patients.first_name} ${note.patients.last_name}`
               : "Paciente";
             return (
-              <div key={note.id} className="bg-white rounded-xl border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${formatColor(note.format)}`}>
-                      {formatLabel(note.format)}
-                    </span>
-                    <span className="text-sm font-medium text-gray-900">{pName}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {note.signed ? (
-                      <span className="text-xs text-green-600 font-medium">✓ Firmada</span>
-                    ) : (
-                      <button
-                        onClick={() => handleSign(note.id)}
-                        className="text-xs text-amber-600 hover:text-amber-700 font-medium px-2 py-1 bg-amber-50 rounded-lg"
-                      >
-                        Firmar
-                      </button>
-                    )}
-                    <span className="text-xs text-gray-400">
-                      {new Date(note.created_at).toLocaleDateString("es-EC", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                </div>
-                <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed line-clamp-4">
-                  {note.content}
-                </div>
-              </div>
+              <ClinicalNoteCard
+                key={note.id}
+                id={note.id}
+                format={note.format}
+                content={note.content}
+                signed={note.signed}
+                createdAt={note.created_at}
+                patientName={pName}
+                onSign={handleSign}
+              />
             );
           })}
         </div>
