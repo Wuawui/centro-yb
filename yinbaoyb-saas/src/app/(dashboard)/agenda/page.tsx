@@ -256,6 +256,106 @@ export default function AgendaPage() {
     loadData();
   }
 
+  // Download schedule as PDF
+  function downloadPDF() {
+    const sortedApts = [...appointments]
+      .filter(a => a.status !== "cancelada")
+      .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
+
+    const dayNamesES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    const monthNamesES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+    const formatDate = (dateStr: string) => {
+      const d = new Date(dateStr + "T12:00:00");
+      return `${dayNamesES[d.getDay()]} ${d.getDate()} de ${monthNamesES[d.getMonth()]} ${d.getFullYear()}`;
+    };
+
+    // Group by date
+    const grouped: Record<string, typeof sortedApts> = {};
+    sortedApts.forEach(a => { if (!grouped[a.date]) grouped[a.date] = []; grouped[a.date].push(a); });
+
+    const statusMap: Record<string, string> = { programada: "Programada", confirmada: "Confirmada", completada: "Completada", cancelada: "Cancelada", no_asistio: "No asistió" };
+    const typeMap: Record<string, string> = { individual: "Individual", grupal: "Grupal", evaluacion: "Evaluación", seguimiento: "Seguimiento", taller: "Taller", online: "Online" };
+
+    let tableRows = "";
+    let rowCount = 0;
+    Object.entries(grouped)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .forEach(([date, apts]) => {
+        apts.forEach((apt, i) => {
+          const pName = (apt.patients as any) ? `${(apt.patients as any).first_name} ${(apt.patients as any).last_name}` : "—";
+          const tName = (apt.profiles as any) ? `${(apt.profiles as any).first_name} ${(apt.profiles as any).last_name}` : "—";
+          const bg = rowCount % 2 === 0 ? "#ffffff" : "#f8fafc";
+          tableRows += `
+            <tr style="background:${bg}">
+              ${i === 0 ? `<td rowspan="${apts.length}" style="font-weight:600;color:#1e293b;vertical-align:top;padding-top:14px;white-space:nowrap">${formatDate(date)}</td>` : ""}
+              <td style="font-weight:700;font-size:15px;color:#0f172a">${apt.start_time.slice(0,5)} – ${apt.end_time.slice(0,5)}</td>
+              <td>${pName}</td>
+              <td>${tName}</td>
+              <td><span style="padding:2px 8px;border-radius:999px;background:#e0e7ff;color:#3730a3;font-size:12px">${typeMap[apt.type] || apt.type}</span></td>
+              <td><span style="padding:2px 8px;border-radius:999px;background:#dcfce7;color:#166534;font-size:12px">${statusMap[apt.status] || apt.status}</span></td>
+            </tr>`;
+          rowCount++;
+        });
+      });
+
+    if (!tableRows) {
+      tableRows = `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:24px">Sin citas para mostrar</td></tr>`;
+    }
+
+    const periodLabel = dateLabel();
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Horario — ${periodLabel}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; background: #fff; padding: 32px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 3px solid #4f46e5; padding-bottom: 16px; }
+    .header h1 { font-size: 24px; font-weight: 800; color: #1e293b; }
+    .header p { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .badge { background: #eef2ff; color: #4f46e5; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { background: #4f46e5; color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+    thead th:first-child { border-radius: 8px 0 0 0; }
+    thead th:last-child { border-radius: 0 8px 0 0; }
+    tbody td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    .footer { margin-top: 24px; text-align: right; font-size: 11px; color: #94a3b8; }
+    @media print { body { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>📅 Horario de Citas</h1>
+      <p>${periodLabel}</p>
+    </div>
+    <span class="badge">${sortedApts.length} cita${sortedApts.length !== 1 ? "s" : ""}</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Horario</th>
+        <th>Paciente</th>
+        <th>Terapeuta</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>${tableRows}</tbody>
+  </table>
+  <div class="footer">Generado el ${new Date().toLocaleDateString("es-EC", { day: "numeric", month: "long", year: "numeric" })} — CentroYB</div>
+  <script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    if (win) { win.document.write(html); win.document.close(); }
+  }
+
   // Get day names
   const dayNames = DAY_NAMES;
   const monthNames = MONTH_NAMES;
@@ -316,11 +416,20 @@ export default function AgendaPage() {
             {pendingCount} cita{pendingCount !== 1 ? "s" : ""} pendiente{pendingCount !== 1 ? "s" : ""} hoy
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {appointments.length > 0 && (
-            <button onClick={handleDeleteAll} className="bg-red-50 text-red-700 border border-red-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 inline-flex items-center gap-2">
-              🗑️ Vaciar Calendario
-            </button>
+            <>
+              <button
+                onClick={downloadPDF}
+                className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-100 inline-flex items-center gap-2"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Descargar PDF
+              </button>
+              <button onClick={handleDeleteAll} className="bg-red-50 text-red-700 border border-red-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 inline-flex items-center gap-2">
+                🗑️ Vaciar Calendario
+              </button>
+            </>
           )}
           <button onClick={() => { setShowNewForm(true); setForm({ ...form, date: selectedDate }); }} className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 inline-flex items-center gap-2">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
